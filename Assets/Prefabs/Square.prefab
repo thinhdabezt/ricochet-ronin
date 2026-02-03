@@ -151,3 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f569717d7fb88d489885fb96a73a270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
+  deathVFXPrefab: {fileID: 2845412792185127949, guid: 78cd7cd310c3aae47868eaf07e82db61, type: 3}

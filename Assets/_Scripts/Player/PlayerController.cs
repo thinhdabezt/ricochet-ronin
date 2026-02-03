@@ -42,8 +42,10 @@ public class Player : MonoBehaviour
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             isDragging = true;
+            SetTimeScale(0.1f);
+
             startPosition = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            rb.linearVelocity = Vector2.zero;
+            //rb.linearVelocity = Vector2.zero;
 
             lr.enabled = true;
         }
@@ -59,6 +61,8 @@ public class Player : MonoBehaviour
         if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
             isDragging = false;
+            SetTimeScale(1f);
+
             endPosition = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
 
             lr.enabled = false;
@@ -68,6 +72,12 @@ public class Player : MonoBehaviour
                 LaunchPlayer();
             }
         }
+    }
+
+    private void SetTimeScale(float scale)
+    {
+        Time.timeScale = scale;
+        Time.fixedDeltaTime = 0.02f * scale;
     }
 
     private void LaunchPlayer()
