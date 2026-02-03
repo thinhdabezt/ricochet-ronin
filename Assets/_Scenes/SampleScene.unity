@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 187132779}
   - component: {fileID: 187132780}
   - component: {fileID: 187132781}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Bottom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -489,7 +489,7 @@ GameObject:
   - component: {fileID: 770068393}
   - component: {fileID: 770068394}
   - component: {fileID: 770068395}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Left
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -662,7 +662,7 @@ GameObject:
   - component: {fileID: 1663829408}
   - component: {fileID: 1663829409}
   - component: {fileID: 1663829410}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Right
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -800,7 +800,7 @@ GameObject:
   - component: {fileID: 1767701346}
   - component: {fileID: 1767701347}
   - component: {fileID: 1767701348}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1061,8 +1061,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0622b3d40fdafbb4ba99c72c9e17dc8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  power: 10
-  maxDragLength: 5
+  power: 15
+  maxDragLength: 7
+  lr: {fileID: 1985503987}
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!58 &1985503986
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1172,7 +1176,7 @@ LineRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 1, g: 0, b: 0, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 0, b: 0, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -1199,7 +1203,7 @@ LineRenderer:
       m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
-    numCornerVertices: 0
+    numCornerVertices: 90
     numCapVertices: 0
     alignment: 0
     textureMode: 0
