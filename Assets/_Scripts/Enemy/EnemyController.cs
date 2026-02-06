@@ -40,6 +40,8 @@ public class EnemyController : MonoBehaviour
 
     private void Die()
     {
+        GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
+
         // Tạo hiệu ứng nổ tại vị trí kẻ địch, không xoay (Quaternion.identity)
         Instantiate(deathVFXPrefab, transform.position, Quaternion.identity);
 
