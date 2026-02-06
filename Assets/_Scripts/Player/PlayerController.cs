@@ -4,19 +4,26 @@ using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    [SerializeField] private float power = 10f;
-    [SerializeField] private float maxDragLength = 10f;
+    [Header("Equipment")]
+    [SerializeField] private WeaponDataSO currentWeapon;
 
     [Header("Trajectory Prediction")]
     [SerializeField] private LineRenderer lr;
     [SerializeField] private LayerMask collisionLayers;
 
+    [SerializeField] private SpriteRenderer sr;
+
+    private float basePower = 10f;
     private Rigidbody2D rb;
     private Vector2 startPosition;
     private Vector2 endPosition;
     private Camera mainCamera;
     private bool isDragging = false;
+
+    private void Start()
+    {
+        EquipWeapon(currentWeapon);
+    }
 
     void Awake()
     {
@@ -37,6 +44,16 @@ public class Player : MonoBehaviour
         HandleInput();
     }
     
+    private void EquipWeapon(WeaponDataSO weapon)
+    {
+        currentWeapon = weapon;
+
+        sr.color = currentWeapon.weaponColor;
+
+        lr.startColor = currentWeapon.weaponColor;
+        lr.endColor = currentWeapon.weaponColor;
+    }
+
     private void HandleInput()
     {
         if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -87,14 +104,17 @@ public class Player : MonoBehaviour
 
         // ClampMagnitude: Cắt bớt vector nếu nó dài hơn maxDragLength
         // Giúp lực bắn không vượt quá giới hạn cho phép
-        Vector2 clampedForce = Vector2.ClampMagnitude(forceVector, maxDragLength);
+        Vector2 clampedForce = Vector2.ClampMagnitude(forceVector, currentWeapon.maxDragDistance);
+
+        // Khi AddForce, nhân thêm hệ số của vũ khí
+        float finalPower = basePower * currentWeapon.powerMultiplier;
 
         // Thêm lực vào Rigidbody
         // ForceMode2D.Impulse: Tác động lực tức thời (như cú đánh, cú nổ) thay vì Force (đẩy từ từ)
-        rb.AddForce(clampedForce * power, ForceMode2D.Impulse);
+        rb.AddForce(clampedForce * finalPower, ForceMode2D.Impulse);
     }
 
-    // --- HÀM MỚI: TÍNH TOÁN QUỸ ĐẠO ---
+    // --- HÀM TÍNH TOÁN QUỸ ĐẠO ---
     private void DrawTrajectory(Vector2 startPos, Vector2 direction)
     {
         // Cần 3 điểm: Điểm bắt đầu -> Điểm chạm tường 1 -> Điểm chạm tường 2

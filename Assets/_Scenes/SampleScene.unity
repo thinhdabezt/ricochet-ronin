@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Square 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3201654130030675420, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
+      propertyPath: enemyData
+      value: 
+      objectReference: {fileID: 11400000, guid: 9af91de2cdc7d8c4281973825fb8eafd, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -783,6 +787,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Square 4
       objectReference: {fileID: 0}
+    - target: {fileID: 3201654130030675420, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
+      propertyPath: enemyData
+      value: 
+      objectReference: {fileID: 11400000, guid: 49f11873206c6d44b9d72c830106bbb1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -845,6 +853,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Square 3
       objectReference: {fileID: 0}
+    - target: {fileID: 3201654130030675420, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
+      propertyPath: enemyData
+      value: 
+      objectReference: {fileID: 11400000, guid: 49f11873206c6d44b9d72c830106bbb1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1265,12 +1277,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0622b3d40fdafbb4ba99c72c9e17dc8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  power: 15
-  maxDragLength: 7
+  currentWeapon: {fileID: 11400000, guid: 5aee96799c3ad5042bd48e5c38612cd4, type: 2}
   lr: {fileID: 1985503987}
   collisionLayers:
     serializedVersion: 2
     m_Bits: 64
+  sr: {fileID: 1985503982}
 --- !u!58 &1985503986
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -1502,6 +1514,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Square 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3201654130030675420, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
+      propertyPath: enemyData
+      value: 
+      objectReference: {fileID: 11400000, guid: 9af91de2cdc7d8c4281973825fb8eafd, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
