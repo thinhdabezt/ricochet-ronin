@@ -32,7 +32,14 @@ public class ComboManager : MonoBehaviour
 
     private void UpdateTimerUI(float timer)
     {
-        timerText.text = $"Timer: {timer.ToString("F2")}";
+        if (currentCombo > 0)
+        {
+            timerText.text = $"Timer: {timer.ToString("F2")}";
+        }
+        else
+        {
+            timerText.text = "";
+        }
     }
 
     void Update()

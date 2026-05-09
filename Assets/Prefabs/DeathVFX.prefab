@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4157823682873430525}
   - component: {fileID: 622250039497161832}
   - component: {fileID: 1175953165211813794}
+  - component: {fileID: 4904071130021441356}
   m_Layer: 0
   m_Name: DeathVFX
   m_TagString: Untagged
@@ -4894,3 +4895,16 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &4904071130021441356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2845412792185127949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7578e2329605fa74688d11bf380165cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ReturnToPool
+  lifetime: 0.5

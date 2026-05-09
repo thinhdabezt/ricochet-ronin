@@ -43,7 +43,18 @@ public class EnemyController : MonoBehaviour
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
 
         // Tạo hiệu ứng nổ tại vị trí kẻ địch, không xoay (Quaternion.identity)
-        Instantiate(deathVFXPrefab, transform.position, Quaternion.identity);
+        // Instantiate(deathVFXPrefab, transform.position, Quaternion.identity);
+
+        // 1. Mượn đồ từ kho
+        GameObject vfx = ObjectPooler.Instance.GetPooledObject();
+
+        if(vfx != null)
+        {
+            // 2. Đặt vị trí và kích hoạt
+            vfx.transform.position = transform.position;
+            vfx.transform.rotation = Quaternion.identity;
+            vfx.SetActive(true);
+        }
 
         // Kích hoạt rung màn hình (Chúng ta sẽ code ở Juice 3)
         CameraShake.Instance.ShakeCamera(5f, 0.2f);
