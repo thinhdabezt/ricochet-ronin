@@ -1254,8 +1254,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fc46b36eec075b479ac3d142256517c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ObjectPooler
-  vfxPrefab: {fileID: 2845412792185127949, guid: 78cd7cd310c3aae47868eaf07e82db61, type: 3}
-  poolSize: 20
+  pools:
+  - key: DeathVFX
+    prefab: {fileID: 2845412792185127949, guid: 78cd7cd310c3aae47868eaf07e82db61, type: 3}
+    size: 10
 --- !u!4 &1251914374
 Transform:
   m_ObjectHideFlags: 0

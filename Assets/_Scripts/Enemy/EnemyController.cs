@@ -1,4 +1,5 @@
-﻿using UnityEditor.Rendering.LookDev;
+﻿using Assets._Scripts.Manager;
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -45,16 +46,8 @@ public class EnemyController : MonoBehaviour
         // Tạo hiệu ứng nổ tại vị trí kẻ địch, không xoay (Quaternion.identity)
         // Instantiate(deathVFXPrefab, transform.position, Quaternion.identity);
 
-        // 1. Mượn đồ từ kho
-        GameObject vfx = ObjectPooler.Instance.GetPooledObject();
-
-        if(vfx != null)
-        {
-            // 2. Đặt vị trí và kích hoạt
-            vfx.transform.position = transform.position;
-            vfx.transform.rotation = Quaternion.identity;
-            vfx.SetActive(true);
-        }
+        // Mượn đồ từ kho
+        ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.5f);
 
         // Kích hoạt rung màn hình (Chúng ta sẽ code ở Juice 3)
         CameraShake.Instance.ShakeCamera(5f, 0.2f);

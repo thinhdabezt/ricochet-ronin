@@ -1,53 +1,118 @@
+using Assets._Scripts.Manager;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using static ObjectPooler;
 
 public class ObjectPooler : MonoBehaviour
 {
     // Singleton pattern để dễ gọi từ bất cứ đâu
     public static ObjectPooler Instance;
 
-    [Header("Pool Settings")]
-    [SerializeField] private GameObject vfxPrefab; // Prefab cần pool
-    [SerializeField] private int poolSize = 20;    // Số lượng tạo sẵn
+    [System.Serializable]
+    public class Pool
+    {
+        public string key;
+        public GameObject prefab;
+        public int size;
+    }
 
     // Danh sách chứa các vật thể trong kho
-    private List<GameObject> pooledObjects;
+    [SerializeField] private List<Pool> pools;
+
+    private Dictionary<string, Queue<GameObject>> poolDictionary;
+    private Dictionary<string, GameObject> prefabDictionary;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        InitiatePool();
     }
 
-    private void Start()
+    void InitiatePool()
     {
         // Khởi tạo danh sách
-        pooledObjects = new List<GameObject>();
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        prefabDictionary = new Dictionary<string, GameObject>();
 
         // Vòng lặp tạo sẵn 20 vật thể ngay khi game bắt đầu
-        for (int i = 0; i < poolSize; i++)
+        foreach (Pool p in pools)
         {
-            GameObject obj = Instantiate(vfxPrefab);
-            obj.SetActive(false); // Tắt nó đi (Cất vào kho)
-            obj.transform.parent = transform; // Gom nó vào object này cho gọn Hierarchy
-            pooledObjects.Add(obj); // Ghi tên vào sổ cái
+            Queue<GameObject> objectPool = new Queue<GameObject>();
+
+            for (int i = 0; i < p.size; i++)
+            {
+                GameObject obj = Instantiate(p.prefab);
+                obj.SetActive(false); // Tắt nó đi để chờ dùng
+
+                PoolObject poolObject = obj.AddComponent<PoolObject>();
+                poolObject.poolKey = p.key;
+                poolObject.pooler = this;
+
+                objectPool.Enqueue(obj); // Đưa vào hàng đợi
+            }
+
+            poolDictionary.Add(p.key, objectPool);
+            prefabDictionary.Add(p.key, p.prefab);
         }
     }
 
-    public GameObject GetPooledObject()
+    public GameObject Spawn(string key, Vector3 position, Quaternion quaternion, float autoReturnTime)
     {
-        // Duyệt qua danh sách xem có cái nào đang RẢNH (không active) không
-        for (int i = 0; i < pooledObjects.Count; i++)
+        if (!poolDictionary.ContainsKey(key))
         {
-            if (!pooledObjects[i].activeInHierarchy) // Nếu vật thể này đang không được sử dụng
-            {
-                return pooledObjects[i]; // Trả về nó để dùng
-            }
+            Debug.LogError($"Pool with key {key} does not exist.");
+            return null;
         }
 
-        // Nếu cả 20 cái đều đang bận (game quá hỗn loạn)?
-        // Cách xử lý đơn giản: Bỏ qua hiệu ứng (return null) hoặc Mở rộng kho (Advanced).
-        // Ở đây ta tạm thời return null.
-        return null;
+        Queue<GameObject> objectPool = poolDictionary[key];
+        GameObject obj;
+
+        // Nếu pool hết object
+        if (objectPool.Count == 0)
+        {
+            obj = Instantiate(prefabDictionary[key]);
+
+            PoolObject poolObject = obj.AddComponent<PoolObject>();
+            poolObject.poolKey = key;
+            poolObject.pooler = this;
+        }
+        else
+        {
+            obj = objectPool.Dequeue(); // Lấy một object từ pool
+        }
+
+        // 2. Đặt vị trí và kích hoạt
+        obj.transform.position = position;
+        obj.transform.rotation = quaternion;
+        obj.SetActive(true);
+
+        if (autoReturnTime > 0)
+        {
+            StartCoroutine(AutoReturnCoroutine(obj, autoReturnTime));
+        }
+
+        return obj;
+    }
+
+    private IEnumerator AutoReturnCoroutine(GameObject obj, float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        if (obj.activeInHierarchy)
+        {
+            ReturnToPool(obj);
+        }
+    }
+
+    public void ReturnToPool(GameObject obj)
+    {
+        PoolObject poolObject = obj.GetComponent<PoolObject>();
+        obj.SetActive(false); // Tắt nó đi
+        poolDictionary[poolObject.poolKey].Enqueue(obj); // Đưa nó trở lại pool
     }
 }
