@@ -27,7 +27,7 @@ public class ComboManager : MonoBehaviour
 
     private void UpdateScoreUI()
     {
-        comboText.text = $"Score: {currentCombo}";
+        comboText.text = $"Combo: {currentCombo}";
     }
 
     private void UpdateTimerUI(float timer)
