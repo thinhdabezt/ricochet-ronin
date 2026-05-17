@@ -1258,6 +1258,9 @@ MonoBehaviour:
   - key: DeathVFX
     prefab: {fileID: 2845412792185127949, guid: 78cd7cd310c3aae47868eaf07e82db61, type: 3}
     size: 10
+  - key: DealtDamage
+    prefab: {fileID: 6019829201483859559, guid: 6334a3c45a4d1e849bf6cd01ca48a392, type: 3}
+    size: 10
 --- !u!4 &1251914374
 Transform:
   m_ObjectHideFlags: 0

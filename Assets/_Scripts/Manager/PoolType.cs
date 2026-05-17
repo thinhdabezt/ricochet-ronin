@@ -9,5 +9,6 @@ namespace Assets._Scripts.Manager
     public enum PoolType
     {
         DeathVFX,
+        DamageText,
     }
 }

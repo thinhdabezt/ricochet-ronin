@@ -7,7 +7,7 @@ public class EnemyController : MonoBehaviour
     [Header("Data Congifuration")]
     [SerializeField] private EnemyDataSO enemyData;
 
-    [SerializeField] private GameObject deathVFXPrefab;
+    // [SerializeField] private GameObject deathVFXPrefab;
 
     private SpriteRenderer sr;
     private int currentHealth;
@@ -31,6 +31,23 @@ public class EnemyController : MonoBehaviour
     private void TakeDamage(int dmg)
     {
         currentHealth -= dmg;
+        
+        GameObject textObj = ObjectPooler.Instance.Spawn(PoolType.DamageText.ToString(), transform.position, Quaternion.identity, 0.8f);
+
+        if (textObj != null)
+        {
+        // Đặt vị trí ban đầu tại Enemy
+        textObj.transform.position = transform.position;
+        textObj.SetActive(true);
+
+        // 2. Truy cập script DamageText để set giá trị
+        DamageText dmgText = textObj.GetComponent<DamageText>();
+        
+        // Ví dụ: Nếu là đòn chí mạng thì màu vàng, bình thường màu trắng
+        Color textColor = (dmg > 1) ? Color.yellow : Color.white;
+        dmgText.Setup(dmg.ToString(), textColor);
+    }   
+
         CameraShake.Instance.ShakeCamera(3f, 0.1f);
 
         if (currentHealth <= 0)
