@@ -1,4 +1,4 @@
-﻿using Assets._Scripts.Manager;
+using Assets._Scripts.Manager;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
@@ -32,21 +32,24 @@ public class EnemyController : MonoBehaviour
     {
         currentHealth -= dmg;
         
-        GameObject textObj = ObjectPooler.Instance.Spawn(PoolType.DamageText.ToString(), transform.position, Quaternion.identity, 0.8f);
+        // Chuyển vị trí Enemy từ World Space sang Screen Space (vòng tròn pixel của Canvas ScreenSpaceOverlay)
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+        
+        GameObject textObj = ObjectPooler.Instance.Spawn(PoolType.DamageText.ToString(), screenPos, Quaternion.identity, 0.8f);
 
         if (textObj != null)
         {
-        // Đặt vị trí ban đầu tại Enemy
-        textObj.transform.position = transform.position;
-        textObj.SetActive(true);
+            // Đặt vị trí ban đầu tại Enemy
+            textObj.transform.position = screenPos;
+            textObj.SetActive(true);
 
-        // 2. Truy cập script DamageText để set giá trị
-        DamageText dmgText = textObj.GetComponent<DamageText>();
-        
-        // Ví dụ: Nếu là đòn chí mạng thì màu vàng, bình thường màu trắng
-        Color textColor = (dmg > 1) ? Color.yellow : Color.white;
-        dmgText.Setup(dmg.ToString(), textColor);
-    }   
+            // 2. Truy cập script DamageText để set giá trị
+            DamageText dmgText = textObj.GetComponent<DamageText>();
+            
+            // Ví dụ: Nếu là đòn chí mạng thì màu vàng, bình thường màu trắng
+            Color textColor = (dmg > 1) ? Color.yellow : Color.white;
+            dmgText.Setup(dmg.ToString(), textColor);
+        }   
 
         CameraShake.Instance.ShakeCamera(3f, 0.1f);
 

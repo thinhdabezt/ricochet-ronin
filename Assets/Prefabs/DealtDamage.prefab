@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4055339208952894505}
   - component: {fileID: 5153000210143825866}
   - component: {fileID: 3335606763104572881}
+  - component: {fileID: -5715133181021977965}
   m_Layer: 5
   m_Name: DealtDamage
   m_TagString: Untagged
@@ -137,3 +138,18 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &-5715133181021977965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6019829201483859559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bd3df8379dbd1b4d8190aaa9a5f527a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageText
+  textMesh: {fileID: 3335606763104572881}
+  floatSpeed: 2
+  lifetime: 0.8
