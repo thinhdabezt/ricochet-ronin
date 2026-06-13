@@ -278,6 +278,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void RegisterSplitEnemy(int count = 1)
+    {
+        EnemiesRemaining += count;
+        UpdateHUD();
+    }
+
+    public void DeductDashes(int amount)
+    {
+        if (IsGameOver || IsVictory) return;
+        DashesRemaining = Mathf.Max(0, DashesRemaining - amount);
+        UpdateHUD();
+        CheckGameOverCondition();
+    }
+
     public void RestartGame()
     {
         Time.timeScale = 1f;

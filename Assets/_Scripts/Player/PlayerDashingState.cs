@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerDashingState : PlayerState
 {
@@ -12,6 +13,14 @@ public class PlayerDashingState : PlayerState
         stateTimer = 0f;
         player.LaunchPlayer();
         GameEvents.OnPlayerDash?.Invoke();
+    }
+
+    public override void HandleInput()
+    {
+        if (Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            stateMachine.ChangeState(player.AimingState);
+        }
     }
 
     public override void Update()
