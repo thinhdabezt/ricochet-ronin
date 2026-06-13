@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
@@ -18,12 +18,17 @@ public class Player : MonoBehaviour
     private Vector2 startPosition;
     private Vector2 endPosition;
     private Camera mainCamera;
-    private bool isDragging = false;
 
-    private void Start()
-    {
-        EquipWeapon(currentWeapon);
-    }
+    // State Machine
+    public PlayerStateMachine StateMachine { get; private set; }
+    public PlayerIdleState IdleState { get; private set; }
+    public PlayerAimingState AimingState { get; private set; }
+    public PlayerDashingState DashingState { get; private set; }
+
+    // Properties exposed for states
+    public Rigidbody2D Rb => rb;
+    public Vector2 StartPosition => startPosition;
+    public Vector2 EndPosition => endPosition;
 
     void Awake()
     {
@@ -31,17 +36,35 @@ public class Player : MonoBehaviour
         mainCamera = Camera.main;
 
         lr.enabled = false;
+
+        // Initialize state machine & states
+        StateMachine = new PlayerStateMachine();
+        IdleState = new PlayerIdleState(this, StateMachine);
+        AimingState = new PlayerAimingState(this, StateMachine);
+        DashingState = new PlayerDashingState(this, StateMachine);
     }
 
-    // Update is called once per frame
+    private void Start()
+    {
+        EquipWeapon(currentWeapon);
+        StateMachine.Initialize(IdleState);
+    }
+
     void Update()
     {
-        if(Keyboard.current.rKey.wasPressedThisFrame)
+        if (Keyboard.current.rKey.wasPressedThisFrame)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            return;
         }
 
-        HandleInput();
+        StateMachine.CurrentState.HandleInput();
+        StateMachine.CurrentState.Update();
+    }
+
+    private void FixedUpdate()
+    {
+        StateMachine.CurrentState.FixedUpdate();
     }
     
     private void EquipWeapon(WeaponDataSO weapon)
@@ -54,50 +77,34 @@ public class Player : MonoBehaviour
         lr.endColor = currentWeapon.weaponColor;
     }
 
-    private void HandleInput()
+    // Helper methods for states
+    public Vector2 GetMouseWorldPosition()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            isDragging = true;
-            SetTimeScale(0.1f);
-
-            startPosition = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            //rb.linearVelocity = Vector2.zero;
-
-            lr.enabled = true;
-        }
-
-        if (isDragging)
-        {
-            Vector2 currentMousePos = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            Vector2 shootDirection = (startPosition - currentMousePos).normalized;
-
-            DrawTrajectory(transform.position, shootDirection);
-        }
-
-        if (Mouse.current.leftButton.wasReleasedThisFrame)
-        {
-            isDragging = false;
-            SetTimeScale(1f);
-
-            endPosition = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-
-            lr.enabled = false;
-
-            if (Vector2.Distance(startPosition, endPosition) > 0.5f)
-            {
-                LaunchPlayer();
-            }
-        }
+        return mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
     }
 
-    private void SetTimeScale(float scale)
+    public void SetTrajectoryLineEnabled(bool enabled)
+    {
+        lr.enabled = enabled;
+    }
+
+    public void SetStartPosition(Vector2 pos)
+    {
+        startPosition = pos;
+    }
+
+    public void SetEndPosition(Vector2 pos)
+    {
+        endPosition = pos;
+    }
+
+    public void SetTimeScale(float scale)
     {
         Time.timeScale = scale;
         Time.fixedDeltaTime = 0.02f * scale;
     }
 
-    private void LaunchPlayer()
+    public void LaunchPlayer()
     {
         // Tính Vector lực: Lấy điểm đầu TRỪ điểm cuối (Cơ chế kéo ngược súng cao su)
         Vector2 forceVector = startPosition - endPosition;
@@ -115,7 +122,7 @@ public class Player : MonoBehaviour
     }
 
     // --- HÀM TÍNH TOÁN QUỸ ĐẠO ---
-    private void DrawTrajectory(Vector2 startPos, Vector2 direction)
+    public void DrawTrajectory(Vector2 startPos, Vector2 direction)
     {
         // Cần 3 điểm: Điểm bắt đầu -> Điểm chạm tường 1 -> Điểm chạm tường 2
         lr.positionCount = 3;
@@ -124,7 +131,7 @@ public class Player : MonoBehaviour
         // Bắn tia Raycast thứ nhất
         RaycastHit2D hit1 = Physics2D.Raycast(startPos, direction, 50f, collisionLayers);
 
-        if(hit1.collider != null)
+        if (hit1.collider != null)
         {
             lr.SetPosition(1, hit1.point);
 
@@ -133,7 +140,7 @@ public class Player : MonoBehaviour
 
             RaycastHit2D hit2 = Physics2D.Raycast(hit1.point + reflectDirection * 0.1f, reflectDirection, 50f, collisionLayers);
 
-            if(hit2.collider != null)
+            if (hit2.collider != null)
             {
                 lr.SetPosition(2, hit2.point);
             }
