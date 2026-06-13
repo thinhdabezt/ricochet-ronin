@@ -11,6 +11,7 @@ public class PlayerDashingState : PlayerState
     {
         stateTimer = 0f;
         player.LaunchPlayer();
+        GameEvents.OnPlayerDash?.Invoke();
     }
 
     public override void Update()
@@ -21,6 +22,9 @@ public class PlayerDashingState : PlayerState
         if (stateTimer >= minDashTime && player.Rb.linearVelocity.magnitude < 0.15f)
         {
             stateMachine.ChangeState(player.IdleState);
+            
+            // Kiểm tra trạng thái Game Over nếu người chơi đã dừng hẳn
+            GameManager.Instance.CheckGameOverCondition();
         }
     }
 }

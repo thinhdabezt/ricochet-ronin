@@ -2062,6 +2062,7 @@ GameObject:
   - component: {fileID: 1876560752}
   - component: {fileID: 1876560751}
   - component: {fileID: 1876560753}
+  - component: {fileID: 1876560754}
   m_Layer: 0
   m_Name: _GameManager
   m_TagString: Untagged
@@ -2111,6 +2112,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComboManager
   comboText: {fileID: 19764120}
   timerText: {fileID: 1002885620}
+--- !u!114 &1876560754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876560750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c04819dd5019da341a140fb24997a570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  enemyPrefab: {fileID: 2660078653089840327, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
+  enemyTypes:
+  - {fileID: 11400000, guid: 9af91de2cdc7d8c4281973825fb8eafd, type: 2}
+  - {fileID: 11400000, guid: 49f11873206c6d44b9d72c830106bbb1, type: 2}
+  totalWaves: 3
 --- !u!1 &1985503981
 GameObject:
   m_ObjectHideFlags: 0

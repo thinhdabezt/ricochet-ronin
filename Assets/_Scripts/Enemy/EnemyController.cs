@@ -12,12 +12,24 @@ public class EnemyController : MonoBehaviour
     private SpriteRenderer sr;
     private int currentHealth;
 
+    public void Initialize(EnemyDataSO data)
+    {
+        enemyData = data;
+        currentHealth = enemyData.maxHealth;
+        if (sr == null) sr = GetComponent<SpriteRenderer>();
+        sr.color = enemyData.enemyColor;
+    }
+
     private void Start()
     {
         sr = GetComponent<SpriteRenderer>();
 
-        currentHealth = enemyData.maxHealth;
-        sr.color = enemyData.enemyColor;
+        // Chỉ khởi tạo nếu chưa được khởi tạo bởi GameManager
+        if (enemyData != null && currentHealth == 0)
+        {
+            currentHealth = enemyData.maxHealth;
+            sr.color = enemyData.enemyColor;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
