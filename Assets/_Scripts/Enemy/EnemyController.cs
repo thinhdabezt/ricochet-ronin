@@ -182,29 +182,52 @@ public class EnemyController : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            if (enemyData.specialMechanic == EnemySpecialMechanic.FrontShield)
+            Player player = collision.GetComponent<Player>();
+            if (player != null)
             {
-                // Calculate dot product of facing direction and player's relative position
-                Vector2 relativePlayerPos = collision.transform.position - transform.position;
-                float dot = Vector2.Dot(relativePlayerPos, transform.right);
-
-                // If player is in front hemisphere of the enemy, block the hit
-                if (dot > 0)
+                bool isDashing = player.StateMachine.CurrentState is PlayerDashingState;
+                if (isDashing)
                 {
+                    if (enemyData.specialMechanic == EnemySpecialMechanic.FrontShield)
+                    {
+                        // Calculate dot product of facing direction and player's relative position
+                        Vector2 relativePlayerPos = collision.transform.position - transform.position;
+                        float dot = Vector2.Dot(relativePlayerPos, transform.right);
+
+                        // If player is in front hemisphere of the enemy, block the hit
+                        if (dot > 0)
+                        {
+                            Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
+                            if (playerRb != null)
+                            {
+                                // Deflect and bounce player back
+                                playerRb.linearVelocity = -playerRb.linearVelocity * 0.8f;
+                            }
+                            
+                            SpawnBlockedText();
+                            CameraShake.Instance.ShakeCamera(2f, 0.08f);
+                            return; // Ignore damage
+                        }
+                    }
+
+                    TakeDamage(1);
+                }
+                else
+                {
+                    // Player is vulnerable and gets hit by the enemy!
+                    GameManager.Instance.PenalizePlayerTime(10f);
+                    CameraShake.Instance.ShakeCamera(4f, 0.15f);
+
+                    // Push player back
                     Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
                     if (playerRb != null)
                     {
-                        // Deflect and bounce player back
-                        playerRb.linearVelocity = -playerRb.linearVelocity * 0.8f;
+                        Vector2 pushDir = (collision.transform.position - transform.position).normalized;
+                        playerRb.linearVelocity = Vector2.zero;
+                        playerRb.AddForce(pushDir * 8f, ForceMode2D.Impulse);
                     }
-                    
-                    SpawnBlockedText();
-                    CameraShake.Instance.ShakeCamera(2f, 0.08f);
-                    return; // Ignore damage
                 }
             }
-
-            TakeDamage(1);
         }
     }
 
@@ -223,7 +246,7 @@ public class EnemyController : MonoBehaviour
             textObj.SetActive(true);
 
             DamageText dmgText = textObj.GetComponent<DamageText>();
-            Color textColor = (dmg > 1) ? Color.yellow : Color.white;
+            Color textColor = Color.red; // Changed from white/yellow to red
             dmgText.Setup(dmg.ToString(), textColor);
         }   
 
@@ -280,10 +303,14 @@ public class EnemyController : MonoBehaviour
                     playerRb.AddForce(pushDir * 15f, ForceMode2D.Impulse);
                 }
 
-                GameManager.Instance.DeductDashes(1);
+                GameManager.Instance.PenalizePlayerTime(10f);
                 SpawnExplosionWarningText();
             }
         }
+
+        // Reward time and track dash kill
+        GameManager.Instance.AddPlayerTime(enemyData.timeBonusOnKill);
+        GameManager.Instance.RegisterDashKill();
 
         // Notify GameManager and destroy
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
@@ -292,6 +319,10 @@ public class EnemyController : MonoBehaviour
 
     private void Die()
     {
+        // Reward time and track dash kill
+        GameManager.Instance.AddPlayerTime(enemyData.timeBonusOnKill);
+        GameManager.Instance.RegisterDashKill();
+
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
         ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.5f);
         CameraShake.Instance.ShakeCamera(5f, 0.2f);

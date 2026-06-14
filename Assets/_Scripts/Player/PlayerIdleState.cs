@@ -7,7 +7,7 @@ public class PlayerIdleState : PlayerState
 
     public override void HandleInput()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
             stateMachine.ChangeState(player.AimingState);
         }

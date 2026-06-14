@@ -5,11 +5,15 @@ public class CameraShake : MonoBehaviour
 {
     public static CameraShake Instance;
 
+    private Vector3 originalPos;
+    private Coroutine activeShakeCoroutine;
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            originalPos = transform.position; // Cache the default static camera position
         }
         else if (Instance != this)
         {
@@ -19,12 +23,16 @@ public class CameraShake : MonoBehaviour
 
     public void ShakeCamera(float intensity, float duration)
     {
-        StartCoroutine(ShakeRoutine(intensity, duration));
+        if (activeShakeCoroutine != null)
+        {
+            StopCoroutine(activeShakeCoroutine);
+            transform.position = originalPos; // Reset camera position before launching a new shake
+        }
+        activeShakeCoroutine = StartCoroutine(ShakeRoutine(intensity, duration));
     }
 
     private IEnumerator ShakeRoutine(float intensity, float duration)
     {
-        Vector3 originalPos = transform.position;
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -39,5 +47,6 @@ public class CameraShake : MonoBehaviour
         }
 
         transform.position = originalPos;
+        activeShakeCoroutine = null;
     }
 }

@@ -13,12 +13,14 @@ public class PlayerDashingState : PlayerState
         stateTimer = 0f;
         player.LaunchPlayer();
         GameEvents.OnPlayerDash?.Invoke();
+        GameManager.Instance.ResetDashKills();
     }
 
     public override void HandleInput()
     {
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
+            GameManager.Instance.ResolveDashEnd();
             stateMachine.ChangeState(player.AimingState);
         }
     }
@@ -30,10 +32,8 @@ public class PlayerDashingState : PlayerState
         // Return to Idle when speed is near zero after minDashTime
         if (stateTimer >= minDashTime && player.Rb.linearVelocity.magnitude < 0.15f)
         {
+            GameManager.Instance.ResolveDashEnd();
             stateMachine.ChangeState(player.IdleState);
-            
-            // Kiểm tra trạng thái Game Over nếu người chơi đã dừng hẳn
-            GameManager.Instance.CheckGameOverCondition();
         }
     }
 }

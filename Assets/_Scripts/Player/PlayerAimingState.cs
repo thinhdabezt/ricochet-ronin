@@ -21,7 +21,7 @@ public class PlayerAimingState : PlayerState
 
     public override void HandleInput()
     {
-        if (Mouse.current.leftButton.wasReleasedThisFrame)
+        if (Mouse.current != null && Mouse.current.leftButton.wasReleasedThisFrame)
         {
             Vector2 endPos = player.GetMouseWorldPosition();
             if (Vector2.Distance(player.StartPosition, endPos) > 0.5f)

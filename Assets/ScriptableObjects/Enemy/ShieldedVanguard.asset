@@ -16,7 +16,7 @@ MonoBehaviour:
   enemyColor: {r: 0, g: 0.8, b: 1, a: 1}
   maxHealth: 1
   scoreValue: 150
-  timeBonusOnKill: 0
+  timeBonusOnKill: 5
   movementType: 1
   moveSpeed: 2
   actionCooldown: 3

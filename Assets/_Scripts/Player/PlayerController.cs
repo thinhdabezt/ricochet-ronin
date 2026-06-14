@@ -52,19 +52,25 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             return;
         }
 
-        StateMachine.CurrentState.HandleInput();
-        StateMachine.CurrentState.Update();
+        if (StateMachine != null && StateMachine.CurrentState != null)
+        {
+            StateMachine.CurrentState.HandleInput();
+            StateMachine.CurrentState.Update();
+        }
     }
 
     private void FixedUpdate()
     {
-        StateMachine.CurrentState.FixedUpdate();
+        if (StateMachine != null && StateMachine.CurrentState != null)
+        {
+            StateMachine.CurrentState.FixedUpdate();
+        }
     }
     
     private void EquipWeapon(WeaponDataSO weapon)
@@ -80,6 +86,7 @@ public class Player : MonoBehaviour
     // Helper methods for states
     public Vector2 GetMouseWorldPosition()
     {
+        if (Mouse.current == null) return transform.position;
         return mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
     }
 
