@@ -59,22 +59,15 @@ public class UIDiegeticTimer : MonoBehaviour
 
     private void Update()
     {
-        // Only tick down if we are actively playing
-        if (GameUIManager.Instance != null && GameUIManager.Instance.CurrentState != GameState.Playing)
+        if (GameManager.Instance != null)
         {
-            return;
-        }
+            remainingTime = GameManager.Instance.PlayerLifeTime;
 
-        // Speed up depletion by a factor of 3 while aiming
-        float drainSpeed = isAiming ? 3f : 1f;
-        remainingTime -= Time.deltaTime * drainSpeed;
-
-        if (remainingTime <= 0f)
-        {
-            remainingTime = 0f;
-            if (GameUIManager.Instance != null && GameUIManager.Instance.CurrentState == GameState.Playing)
+            // Automatically detect player aiming state and set local property
+            if (playerTransform != null)
             {
-                GameUIManager.Instance.TransitionToState(GameState.GameOver);
+                var player = playerTransform.GetComponent<Player>();
+                isAiming = player != null && player.StateMachine != null && player.StateMachine.CurrentState is PlayerAimingState;
             }
         }
 

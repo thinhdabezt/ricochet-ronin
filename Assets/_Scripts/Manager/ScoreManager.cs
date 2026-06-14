@@ -1,10 +1,7 @@
-using System;
-using TMPro;
 using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI scoreText;
     private int currentScore = 0;
 
     private void OnEnable()
@@ -17,14 +14,9 @@ public class ScoreManager : MonoBehaviour
         GameEvents.OnEnemyDie -= UpdateScore;
     }
 
-    private void UpdateScore(int score)
+    private void UpdateScore(int score, Vector2 position)
     {
         currentScore += score;
-        UpdateUI();
-    }
-
-    private void UpdateUI()
-    {
-        scoreText.text = $"Score: {currentScore}";
+        GameEvents.OnScoreChanged?.Invoke(currentScore);
     }
 }

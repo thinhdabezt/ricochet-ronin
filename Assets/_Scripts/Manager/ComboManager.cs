@@ -1,10 +1,7 @@
-﻿using TMPro;
 using UnityEngine;
 
 public class ComboManager : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI comboText;
-    [SerializeField] private TextMeshProUGUI timerText;
     private int currentCombo = 0;
     private float comboResetTime = 2f;
 
@@ -18,31 +15,17 @@ public class ComboManager : MonoBehaviour
         GameEvents.OnEnemyDie -= UpdateCombo;
     }
 
-    private void UpdateCombo(int score)
+    private void UpdateCombo(int score, Vector2 position)
     {
-        currentCombo += score;
+        currentCombo++;
         comboResetTime = 2f;
-        UpdateScoreUI();
+
+        // Broadcast event-driven updates for observers (HUD and Combo Spawner)
+        GameEvents.OnEnemyKilled?.Invoke(position, currentCombo);
+        GameEvents.OnComboChanged?.Invoke(currentCombo);
     }
 
-    private void UpdateScoreUI()
-    {
-        comboText.text = $"Combo: {currentCombo}";
-    }
-
-    private void UpdateTimerUI(float timer)
-    {
-        if (currentCombo > 0)
-        {
-            timerText.text = $"Timer: {timer.ToString("F2")}";
-        }
-        else
-        {
-            timerText.text = "";
-        }
-    }
-
-    void Update()
+    private void Update()
     {
         if (currentCombo > 0)
         {
@@ -50,11 +33,9 @@ public class ComboManager : MonoBehaviour
             if (comboResetTime <= 0f)
             {
                 currentCombo = 0;
-                UpdateScoreUI();
-                comboResetTime = 2f; // Reset lại thời gian cho combo tiếp theo
+                comboResetTime = 2f;
+                GameEvents.OnComboChanged?.Invoke(0);
             }
-            UpdateTimerUI(comboResetTime);
         }
-
     }
 }

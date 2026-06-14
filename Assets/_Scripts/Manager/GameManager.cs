@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI waveText; // Will display PlayerLifeTime
     private TextMeshProUGUI dashesText; // Will display LevelSurvivalTime
     private GameObject endGamePanel;
+    private int lastSecondsRemaining = -1;
 
     private void Awake()
     {
@@ -88,8 +89,20 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Determine player aiming state to apply triple drain speed
+        float drainMultiplier = 1f;
+        var playerGo = GameObject.FindWithTag("Player");
+        if (playerGo != null)
+        {
+            var player = playerGo.GetComponent<Player>();
+            if (player != null && player.StateMachine != null && player.StateMachine.CurrentState is PlayerAimingState)
+            {
+                drainMultiplier = 3f;
+            }
+        }
+
         // Run timers
-        PlayerLifeTime -= Time.deltaTime;
+        PlayerLifeTime -= Time.deltaTime * drainMultiplier;
         LevelSurvivalTime -= Time.deltaTime;
 
         if (PlayerLifeTime <= 0f)
@@ -104,7 +117,13 @@ public class GameManager : MonoBehaviour
             TriggerVictory();
         }
 
-        UpdateHUD();
+        // Broadcast event only when remaining seconds integer changes (once per second)
+        int currentSecs = Mathf.CeilToInt(LevelSurvivalTime);
+        if (currentSecs != lastSecondsRemaining)
+        {
+            lastSecondsRemaining = currentSecs;
+            GameEvents.OnSurvivalTimeChanged?.Invoke(currentSecs);
+        }
     }
 
     private void SetupHUD()
@@ -155,6 +174,7 @@ public class GameManager : MonoBehaviour
 
         // Programmatically configure and position all 5 HUD elements cleanly
         ConfigureHUDText(waveGo, waveText, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -40), TextAlignmentOptions.Left, 18);
+        waveText.text = "";
         
         if (comboGo != null)
         {
@@ -169,6 +189,7 @@ public class GameManager : MonoBehaviour
         }
 
         ConfigureHUDText(dashesGo, dashesText, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -40), TextAlignmentOptions.Right, 18);
+        dashesText.text = "";
 
         if (scoreGo != null)
         {
@@ -216,8 +237,6 @@ public class GameManager : MonoBehaviour
         {
             SpawnEnemy();
         }
-
-        UpdateHUD();
     }
 
     private void SpawnEnemy()
@@ -241,13 +260,12 @@ public class GameManager : MonoBehaviour
         // Dash triggers normally
     }
 
-    private void HandleEnemyKilled(int score)
+    private void HandleEnemyKilled(int score, Vector2 position)
     {
         // Add default time based on kill (will be overridden by enemyData.timeBonusOnKill in EnemyController)
         // This is handled in EnemyController calling AddPlayerTime directly.
         
         EnemiesRemaining--;
-        UpdateHUD();
 
         if (EnemiesRemaining <= 0)
         {
@@ -408,23 +426,11 @@ public class GameManager : MonoBehaviour
         subRect.anchoredPosition = new Vector2(0, -50);
     }
 
-    private void UpdateHUD()
-    {
-        if (waveText != null)
-        {
-            waveText.text = $"TIME: {PlayerLifeTime:F1}s";
-            waveText.color = PlayerLifeTime < 15f ? Color.red : Color.cyan;
-        }
-        if (dashesText != null)
-        {
-            dashesText.text = $"SURVIVE: {LevelSurvivalTime:F0}s";
-        }
-    }
+    private void RemoveLegacyHUDMethodPlaceholder() {}
 
     public void RegisterSplitEnemy(int count = 1)
     {
         EnemiesRemaining += count;
-        UpdateHUD();
     }
 
     public void DeductDashes(int amount)

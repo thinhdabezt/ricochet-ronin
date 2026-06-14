@@ -313,7 +313,8 @@ public class EnemyController : MonoBehaviour
         GameManager.Instance.RegisterDashKill();
 
         // Notify GameManager and destroy
-        GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
+        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, enemyData.timeBonusOnKill);
+        GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
         Destroy(gameObject);
     }
 
@@ -323,7 +324,8 @@ public class EnemyController : MonoBehaviour
         GameManager.Instance.AddPlayerTime(enemyData.timeBonusOnKill);
         GameManager.Instance.RegisterDashKill();
 
-        GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue);
+        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, enemyData.timeBonusOnKill);
+        GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
         ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.5f);
         CameraShake.Instance.ShakeCamera(5f, 0.2f);
 

@@ -9,7 +9,22 @@ using static ObjectPooler;
 public class ObjectPooler : MonoBehaviour
 {
     // Singleton pattern để dễ gọi từ bất cứ đâu
-    public static ObjectPooler Instance;
+    private static ObjectPooler _instance;
+    public static ObjectPooler Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindObjectOfType<ObjectPooler>();
+                if (_instance != null)
+                {
+                    _instance.InitiatePool();
+                }
+            }
+            return _instance;
+        }
+    }
 
     [System.Serializable]
     public class Pool
@@ -24,17 +39,31 @@ public class ObjectPooler : MonoBehaviour
 
     private Dictionary<string, Queue<GameObject>> poolDictionary;
     private Dictionary<string, GameObject> prefabDictionary;
+    private bool isInitialized = false;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-
-        InitiatePool();
+        if (_instance == null)
+        {
+            _instance = this;
+            InitiatePool();
+        }
+        else if (_instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        else
+        {
+            InitiatePool();
+        }
     }
 
-    void InitiatePool()
+    public void InitiatePool()
     {
+        if (isInitialized) return;
+        isInitialized = true;
+
         // Khởi tạo danh sách
         poolDictionary = new Dictionary<string, Queue<GameObject>>();
         prefabDictionary = new Dictionary<string, GameObject>();
