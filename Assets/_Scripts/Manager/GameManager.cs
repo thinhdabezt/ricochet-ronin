@@ -26,6 +26,16 @@ public class GameManager : MonoBehaviour
     public bool IsGameOver { get; private set; } = false;
     public bool IsVictory { get; private set; } = false;
 
+    // Upgrades and Roguelike variables
+    private float killTimeBonusAddition = 0f;
+    private float aimingDrainMultiplierModifier = 1f;
+    private int currentFloor = 1;
+    private bool isFloorCleared = false;
+    private GameObject draftingPanelGo;
+
+    public float KillTimeBonusModifier => killTimeBonusAddition;
+    public int CurrentFloor => currentFloor;
+
     private int killsInCurrentDash = 0;
     private Transform enemiesContainer;
     private Canvas uiCanvas;
@@ -89,7 +99,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Determine player aiming state to apply triple drain speed
+        // Determine player aiming state to apply triple drain speed (influenced by upgrades)
         float drainMultiplier = 1f;
         var playerGo = GameObject.FindWithTag("Player");
         if (playerGo != null)
@@ -97,13 +107,17 @@ public class GameManager : MonoBehaviour
             var player = playerGo.GetComponent<Player>();
             if (player != null && player.StateMachine != null && player.StateMachine.CurrentState is PlayerAimingState)
             {
-                drainMultiplier = 3f;
+                drainMultiplier = 3f * aimingDrainMultiplierModifier;
             }
         }
 
         // Run timers
         PlayerLifeTime -= Time.deltaTime * drainMultiplier;
-        LevelSurvivalTime -= Time.deltaTime;
+        
+        if (LevelSurvivalTime > 0f)
+        {
+            LevelSurvivalTime = Mathf.Max(0f, LevelSurvivalTime - Time.deltaTime);
+        }
 
         if (PlayerLifeTime <= 0f)
         {
@@ -111,10 +125,10 @@ public class GameManager : MonoBehaviour
             TriggerGameOver();
         }
 
-        if (LevelSurvivalTime <= 0f)
+        // Check if floor is cleared (Timer finished AND all enemies killed)
+        if (LevelSurvivalTime <= 0f && EnemiesRemaining <= 0 && !isFloorCleared)
         {
-            LevelSurvivalTime = 0f;
-            TriggerVictory();
+            TriggerFloorClear();
         }
 
         // Broadcast event only when remaining seconds integer changes (once per second)
@@ -239,6 +253,51 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private EnemyDataSO GetRandomEnemyDataForCurrentFloor()
+    {
+        if (enemyTypes == null || enemyTypes.Length == 0) return null;
+
+        List<EnemyDataSO> allowedTypes = new List<EnemyDataSO>();
+
+        foreach (var enemy in enemyTypes)
+        {
+            if (enemy == null) continue;
+
+            // Tier unlock conditions based on currentFloor:
+            // Floor 1: Only simple enemies (None special mechanic, Static or Patrol movement)
+            if (currentFloor == 1)
+            {
+                if (enemy.specialMechanic == EnemySpecialMechanic.None &&
+                    (enemy.movementType == EnemyMovementType.Static || enemy.movementType == EnemyMovementType.Patrol))
+                {
+                    allowedTypes.Add(enemy);
+                }
+            }
+            // Floor 2: Simple + Shielded Vanguard (FrontShield) + Mitosis Slime (SplitOnDeath)
+            else if (currentFloor == 2)
+            {
+                if (enemy.specialMechanic == EnemySpecialMechanic.None ||
+                    enemy.specialMechanic == EnemySpecialMechanic.FrontShield ||
+                    enemy.specialMechanic == EnemySpecialMechanic.SplitOnDeath)
+                {
+                    allowedTypes.Add(enemy);
+                }
+            }
+            // Floor 3+: All types unlock (WeaverDrone, Blink, ExplodeOnDeath)
+            else
+            {
+                allowedTypes.Add(enemy);
+            }
+        }
+
+        if (allowedTypes.Count == 0)
+        {
+            return enemyTypes[Random.Range(0, enemyTypes.Length)];
+        }
+
+        return allowedTypes[Random.Range(0, allowedTypes.Count)];
+    }
+
     private void SpawnEnemy()
     {
         if (enemyPrefab == null || enemyTypes.Length == 0) return;
@@ -250,8 +309,18 @@ public class GameManager : MonoBehaviour
         EnemyController controller = enemyGo.GetComponent<EnemyController>();
         if (controller != null)
         {
-            EnemyDataSO selectedData = enemyTypes[Random.Range(0, enemyTypes.Length)];
-            controller.Initialize(selectedData);
+            EnemyDataSO baseData = GetRandomEnemyDataForCurrentFloor();
+            
+            // Create a runtime copy to avoid permanent asset file modifications on disk
+            EnemyDataSO scaledData = Instantiate(baseData);
+
+            // Apply scaling based on floor level
+            float difficultyMultiplier = 1f + (currentFloor - 1) * 0.15f; // +15% move speed & score per floor
+            scaledData.moveSpeed *= difficultyMultiplier;
+            scaledData.maxHealth += (currentFloor - 1) / 2; // +1 health every 2 floors
+            scaledData.scoreValue = Mathf.RoundToInt(scaledData.scoreValue * difficultyMultiplier);
+
+            controller.Initialize(scaledData);
         }
     }
 
@@ -278,7 +347,18 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         if (!IsGameOver && !IsVictory)
         {
-            StartWave(CurrentWave + 1);
+            if (LevelSurvivalTime > 0f)
+            {
+                StartWave(CurrentWave + 1);
+            }
+            else
+            {
+                // Timer is at 0, and player just killed the last remaining enemy
+                if (!isFloorCleared)
+                {
+                    TriggerFloorClear();
+                }
+            }
         }
     }
 
@@ -443,5 +523,298 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void TriggerFloorClear()
+    {
+        isFloorCleared = true;
+
+        // Clean up remaining entities in the level (like slow zones)
+        var slowZones = FindObjectsOfType<SlowZone>();
+        foreach (var sz in slowZones)
+        {
+            Destroy(sz.gameObject);
+        }
+
+        // Spawn Portal at center
+        SpawnPortal();
+
+        // Trigger Card Selection UI Overlay
+        CreateDraftingPanel();
+    }
+
+    private void SpawnPortal()
+    {
+        GameObject portalGo = new GameObject("NextFloorPortal");
+        portalGo.transform.position = Vector3.zero;
+        portalGo.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
+
+        var portalSr = portalGo.AddComponent<SpriteRenderer>();
+        var playerGo = GameObject.FindWithTag("Player");
+        if (playerGo != null)
+        {
+            var playerSr = playerGo.GetComponent<SpriteRenderer>();
+            if (playerSr != null)
+            {
+                portalSr.sprite = playerSr.sprite;
+            }
+        }
+        portalSr.color = new Color(0.6f, 0.2f, 1.0f, 0.8f); // Neon violet color
+        portalSr.sortingOrder = 5;
+
+        portalGo.AddComponent<Portal>();
+
+        var col = portalGo.AddComponent<CircleCollider2D>();
+        col.isTrigger = true;
+        col.radius = 0.5f;
+    }
+
+    private List<UpgradeCard> GetUpgradeCards()
+    {
+        var cards = new List<UpgradeCard>();
+        
+        var playerGo = GameObject.FindWithTag("Player");
+        Player player = playerGo != null ? playerGo.GetComponent<Player>() : null;
+
+        // Draft cards as requested, marked with [DRAFT] tag
+        cards.Add(new UpgradeCard(
+            "[DRAFT] SWIFT BLADE", 
+            "+20% LAUNCH POWER\n\nSlices faster and with greater velocity.", 
+            () => {
+                if (player != null) player.UpgradeWeaponPower(0.20f);
+            }
+        ));
+
+        cards.Add(new UpgradeCard(
+            "[DRAFT] CALM MIND", 
+            "HALVES AIM TIME DRAIN\n\nAiming slow-mo drains remaining lifetime 50% slower.", 
+            () => {
+                aimingDrainMultiplierModifier *= 0.5f;
+            }
+        ));
+
+        cards.Add(new UpgradeCard(
+            "[DRAFT] EXTENDED REACH", 
+            "+15% DRAG RANGE\n\nAllows for longer aiming drag slingshots.", 
+            () => {
+                if (player != null) player.UpgradeWeaponDrag(0.15f);
+            }
+        ));
+
+        cards.Add(new UpgradeCard(
+            "[DRAFT] SOUL HARVEST", 
+            "+1S TIME ON KILLS\n\nIncreases the lifetime gained from clearing enemies.", 
+            () => {
+                killTimeBonusAddition += 1.0f;
+            }
+        ));
+
+        cards.Add(new UpgradeCard(
+            "[DRAFT] REJUVENATION", 
+            "+20S LIFE RECOVERY\n\nInstantly restores 20 seconds of lifetime.", 
+            () => {
+                AddPlayerTime(20f);
+            }
+        ));
+
+        return cards;
+    }
+
+    private List<UpgradeCard> GetRandomCards(int count)
+    {
+        var allCards = GetUpgradeCards();
+        var selected = new List<UpgradeCard>();
+        while (selected.Count < count && allCards.Count > 0)
+        {
+            int idx = Random.Range(0, allCards.Count);
+            selected.Add(allCards[idx]);
+            allCards.RemoveAt(idx);
+        }
+        return selected;
+    }
+
+    private void CreateDraftingPanel()
+    {
+        if (uiCanvas == null) return;
+
+        // Pause game actions
+        Time.timeScale = 0f;
+
+        // Container panel
+        draftingPanelGo = new GameObject("DraftingPanel");
+        draftingPanelGo.transform.SetParent(uiCanvas.transform, false);
+        
+        var rect = draftingPanelGo.AddComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.sizeDelta = Vector2.zero;
+
+        var img = draftingPanelGo.AddComponent<Image>();
+        img.color = new Color(0.05f, 0.05f, 0.08f, 0.85f); // Semi-translucent dark background
+
+        // Central card selection container
+        var boxGo = new GameObject("DraftingBox");
+        boxGo.transform.SetParent(draftingPanelGo.transform, false);
+        var boxRect = boxGo.AddComponent<RectTransform>();
+        boxRect.sizeDelta = new Vector2(650, 400);
+        var boxImg = boxGo.AddComponent<Image>();
+        boxImg.color = new Color(0.12f, 0.12f, 0.16f, 0.95f); // Dark slate card holder
+
+        // Title text
+        var titleGo = new GameObject("DraftingTitle");
+        titleGo.transform.SetParent(boxGo.transform, false);
+        var titleText = titleGo.AddComponent<TextMeshProUGUI>();
+        titleText.text = "SELECT AN UPGRADE";
+        titleText.fontSize = 26;
+        titleText.color = new Color(0.2f, 0.9f, 0.5f); // Neon green accent
+        titleText.alignment = TextAlignmentOptions.Center;
+
+        // Styling with QuinqueFive pixel font if found
+        TMP_FontAsset pixelFont = null;
+        var comboGo = uiCanvas.transform.Find("Combo")?.gameObject;
+        if (comboGo != null)
+        {
+            var comboTextComp = comboGo.GetComponent<TextMeshProUGUI>();
+            if (comboTextComp != null) pixelFont = comboTextComp.font;
+        }
+        if (pixelFont != null) titleText.font = pixelFont;
+
+        var titleRect = titleGo.AddComponent<RectTransform>();
+        titleRect.anchorMin = new Vector2(0.5f, 1f);
+        titleRect.anchorMax = new Vector2(0.5f, 1f);
+        titleRect.pivot = new Vector2(0.5f, 1f);
+        titleRect.sizeDelta = new Vector2(600, 50);
+        titleRect.anchoredPosition = new Vector2(0, -30);
+
+        // Get 3 random unique cards
+        List<UpgradeCard> chosenCards = GetRandomCards(3);
+
+        float startX = -200f;
+        float spacingX = 200f;
+
+        for (int i = 0; i < chosenCards.Count; i++)
+        {
+            var card = chosenCards[i];
+
+            // Card Panel Button
+            var cardBtnGo = new GameObject($"CardButton_{i}");
+            cardBtnGo.transform.SetParent(boxGo.transform, false);
+            
+            var cardBtnRect = cardBtnGo.AddComponent<RectTransform>();
+            cardBtnRect.sizeDelta = new Vector2(175, 250);
+            cardBtnRect.anchoredPosition = new Vector2(startX + i * spacingX, -30);
+
+            var cardImg = cardBtnGo.AddComponent<Image>();
+            cardImg.color = new Color(0.18f, 0.18f, 0.24f, 1f);
+
+            var btn = cardBtnGo.AddComponent<Button>();
+            
+            // Neon tint transition
+            ColorBlock cb = btn.colors;
+            cb.normalColor = new Color(0.18f, 0.18f, 0.24f, 1f);
+            cb.highlightedColor = new Color(0.25f, 0.25f, 0.35f, 1f);
+            cb.pressedColor = new Color(0.12f, 0.12f, 0.18f, 1f);
+            btn.colors = cb;
+
+            btn.onClick.AddListener(() => {
+                card.ApplyUpgrade();
+                
+                // Resume game timescale
+                Time.timeScale = 1f;
+                Destroy(draftingPanelGo);
+                
+                SpawnTimeText("UPGRADE APPLIED!", new Color(0.2f, 0.9f, 0.5f));
+            });
+
+            // Card Title text
+            var cardTitleGo = new GameObject("CardTitle");
+            cardTitleGo.transform.SetParent(cardBtnGo.transform, false);
+            var cardTitleText = cardTitleGo.AddComponent<TextMeshProUGUI>();
+            cardTitleText.text = card.Name;
+            cardTitleText.fontSize = 11;
+            cardTitleText.color = Color.white;
+            cardTitleText.alignment = TextAlignmentOptions.Center;
+            if (pixelFont != null) cardTitleText.font = pixelFont;
+
+            var ctRect = cardTitleGo.AddComponent<RectTransform>();
+            ctRect.anchorMin = new Vector2(0.5f, 1f);
+            ctRect.anchorMax = new Vector2(0.5f, 1f);
+            ctRect.pivot = new Vector2(0.5f, 1f);
+            ctRect.sizeDelta = new Vector2(160, 45);
+            ctRect.anchoredPosition = new Vector2(0, -15);
+
+            // Card Description text
+            var cardDescGo = new GameObject("CardDesc");
+            cardDescGo.transform.SetParent(cardBtnGo.transform, false);
+            var cardDescText = cardDescGo.AddComponent<TextMeshProUGUI>();
+            cardDescText.text = card.Description;
+            cardDescText.fontSize = 9;
+            cardDescText.color = new Color(0.8f, 0.8f, 0.8f);
+            cardDescText.alignment = TextAlignmentOptions.Center;
+            if (pixelFont != null) cardDescText.font = pixelFont;
+
+            var cdRect = cardDescGo.AddComponent<RectTransform>();
+            cdRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cdRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cdRect.pivot = new Vector2(0.5f, 0.5f);
+            cdRect.sizeDelta = new Vector2(160, 140);
+            cdRect.anchoredPosition = new Vector2(0, -25);
+        }
+    }
+
+    public void AdvanceToNextFloor()
+    {
+        currentFloor++;
+        isFloorCleared = false;
+
+        // Reset survival timer to default
+        LevelSurvivalTime = initialLevelSurvivalTime;
+
+        // Reset player positions and clear velocities
+        var playerGo = GameObject.FindWithTag("Player");
+        if (playerGo != null)
+        {
+            playerGo.transform.position = Vector3.zero;
+            var playerRb = playerGo.GetComponent<Rigidbody2D>();
+            if (playerRb != null)
+            {
+                playerRb.linearVelocity = Vector2.zero;
+                playerRb.angularVelocity = 0f;
+            }
+
+            // Put Player back to Idle state
+            var player = playerGo.GetComponent<Player>();
+            if (player != null && player.StateMachine != null)
+            {
+                player.StateMachine.ChangeState(player.IdleState);
+            }
+        }
+
+        // Clean up remaining slow zones or hazards
+        var slowZones = FindObjectsOfType<SlowZone>();
+        foreach (var sz in slowZones)
+        {
+            Destroy(sz.gameObject);
+        }
+
+        // Display Floor Announcement above player
+        SpawnTimeText($"FLOOR {currentFloor}", new Color(0.2f, 0.9f, 0.5f));
+
+        // Start Wave 1 on the new floor
+        StartWave(1);
+    }
+}
+
+public class UpgradeCard
+{
+    public string Name;
+    public string Description;
+    public System.Action ApplyUpgrade;
+
+    public UpgradeCard(string name, string description, System.Action applyUpgrade)
+    {
+        Name = name;
+        Description = description;
+        ApplyUpgrade = applyUpgrade;
     }
 }

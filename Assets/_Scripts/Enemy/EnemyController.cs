@@ -309,11 +309,16 @@ public class EnemyController : MonoBehaviour
         }
 
         // Reward time and track dash kill
-        GameManager.Instance.AddPlayerTime(enemyData.timeBonusOnKill);
+        float totalTimeBonus = enemyData.timeBonusOnKill;
+        if (GameManager.Instance != null)
+        {
+            totalTimeBonus += GameManager.Instance.KillTimeBonusModifier;
+        }
+        GameManager.Instance.AddPlayerTime(totalTimeBonus);
         GameManager.Instance.RegisterDashKill();
 
         // Notify GameManager and destroy
-        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, enemyData.timeBonusOnKill);
+        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, totalTimeBonus);
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
         Destroy(gameObject);
     }
@@ -321,10 +326,15 @@ public class EnemyController : MonoBehaviour
     private void Die()
     {
         // Reward time and track dash kill
-        GameManager.Instance.AddPlayerTime(enemyData.timeBonusOnKill);
+        float totalTimeBonus = enemyData.timeBonusOnKill;
+        if (GameManager.Instance != null)
+        {
+            totalTimeBonus += GameManager.Instance.KillTimeBonusModifier;
+        }
+        GameManager.Instance.AddPlayerTime(totalTimeBonus);
         GameManager.Instance.RegisterDashKill();
 
-        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, enemyData.timeBonusOnKill);
+        GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, totalTimeBonus);
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
         ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.5f);
         CameraShake.Instance.ShakeCamera(5f, 0.2f);

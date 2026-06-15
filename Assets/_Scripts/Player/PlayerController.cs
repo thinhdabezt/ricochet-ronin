@@ -73,14 +73,32 @@ public class Player : MonoBehaviour
         }
     }
     
+    public float AimingDrainRateModifier { get; set; } = 1.0f;
+
     private void EquipWeapon(WeaponDataSO weapon)
     {
-        currentWeapon = weapon;
+        currentWeapon = Instantiate(weapon); // Create a runtime copy to avoid disk asset mutations
 
         sr.color = currentWeapon.weaponColor;
 
         lr.startColor = currentWeapon.weaponColor;
         lr.endColor = currentWeapon.weaponColor;
+    }
+
+    public void UpgradeWeaponPower(float percentage)
+    {
+        if (currentWeapon != null)
+        {
+            currentWeapon.powerMultiplier += currentWeapon.powerMultiplier * percentage;
+        }
+    }
+
+    public void UpgradeWeaponDrag(float percentage)
+    {
+        if (currentWeapon != null)
+        {
+            currentWeapon.maxDragDistance += currentWeapon.maxDragDistance * percentage;
+        }
     }
 
     // Helper methods for states

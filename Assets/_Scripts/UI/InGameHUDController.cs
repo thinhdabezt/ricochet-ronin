@@ -24,8 +24,14 @@ public class InGameHUDController : MonoBehaviour
     {
         if (objectiveText != null)
         {
-            // Fully optimized: only run once per second when event is triggered
-            objectiveText.text = $"{objectivePrefix}{secondsRemaining}{objectiveSuffix}";
+            if (secondsRemaining > 0)
+            {
+                objectiveText.text = $"{objectivePrefix}{secondsRemaining}{objectiveSuffix}";
+            }
+            else
+            {
+                objectiveText.text = "PORTAL OPEN! ENTER TO ADVANCE";
+            }
         }
     }
 }
