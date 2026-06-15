@@ -18,6 +18,7 @@ public class EnemyController : MonoBehaviour
     private Transform playerTransform;
     private bool isFusing = false;
     private GameObject shieldObj;
+    private bool isFrozen = false;
 
     public void Initialize(EnemyDataSO data)
     {
@@ -73,7 +74,7 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
-        if (isFusing || enemyData == null) return;
+        if (isFrozen || isFusing || enemyData == null) return;
 
         if (playerTransform == null)
         {
@@ -210,14 +211,20 @@ public class EnemyController : MonoBehaviour
                         }
                     }
 
-                    TakeDamage(1);
+                    int damage = (GameManager.Instance != null && GameManager.Instance.IsGlassBladeActive ? 3 : 1);
+                    if (GameManager.Instance != null)
+                    {
+                        damage += player.CurrentDashBounces * GameManager.Instance.KineticMomentumBonusDamage;
+                    }
+                    TakeDamage(damage);
                 }
                 else
                 {
                     // Player is vulnerable and gets hit by the enemy!
-                    GameManager.Instance.PenalizePlayerTime(10f);
+                    float penalty = (GameManager.Instance != null && GameManager.Instance.IsGlassBladeActive ? 25f : 10f);
+                    GameManager.Instance.PenalizePlayerTime(penalty);
                     CameraShake.Instance.ShakeCamera(4f, 0.15f);
-
+ 
                     // Push player back
                     Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
                     if (playerRb != null)
@@ -231,7 +238,19 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    private void TakeDamage(int dmg)
+    public void Freeze(float duration)
+    {
+        StartCoroutine(FreezeRoutine(duration));
+    }
+ 
+    private IEnumerator FreezeRoutine(float duration)
+    {
+        isFrozen = true;
+        yield return new WaitForSeconds(duration);
+        isFrozen = false;
+    }
+ 
+    public void TakeDamage(int dmg)
     {
         if (isFusing || currentHealth <= 0) return;
 
@@ -312,6 +331,22 @@ public class EnemyController : MonoBehaviour
         float totalTimeBonus = enemyData.timeBonusOnKill;
         if (GameManager.Instance != null)
         {
+            bool isRicochet = false;
+            var playerGo = GameObject.FindWithTag("Player");
+            if (playerGo != null)
+            {
+                var player = playerGo.GetComponent<Player>();
+                if (player != null && player.CurrentDashBounces > 0)
+                {
+                    isRicochet = true;
+                }
+            }
+ 
+            if (isRicochet)
+            {
+                totalTimeBonus *= (1f + GameManager.Instance.TimeHarvesterBonusPercent);
+            }
+ 
             totalTimeBonus += GameManager.Instance.KillTimeBonusModifier;
         }
         GameManager.Instance.AddPlayerTime(totalTimeBonus);
@@ -329,6 +364,22 @@ public class EnemyController : MonoBehaviour
         float totalTimeBonus = enemyData.timeBonusOnKill;
         if (GameManager.Instance != null)
         {
+            bool isRicochet = false;
+            var playerGo = GameObject.FindWithTag("Player");
+            if (playerGo != null)
+            {
+                var player = playerGo.GetComponent<Player>();
+                if (player != null && player.CurrentDashBounces > 0)
+                {
+                    isRicochet = true;
+                }
+            }
+ 
+            if (isRicochet)
+            {
+                totalTimeBonus *= (1f + GameManager.Instance.TimeHarvesterBonusPercent);
+            }
+ 
             totalTimeBonus += GameManager.Instance.KillTimeBonusModifier;
         }
         GameManager.Instance.AddPlayerTime(totalTimeBonus);

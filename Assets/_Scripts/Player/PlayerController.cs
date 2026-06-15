@@ -74,6 +74,29 @@ public class Player : MonoBehaviour
     }
     
     public float AimingDrainRateModifier { get; set; } = 1.0f;
+    public float AimingTimeScaleModifier { get; set; } = 1.0f;
+
+    // Active Mutation Locks
+    public bool HasDoubleDash { get; set; } = false;
+    public bool HasVacuumBlade { get; set; } = false;
+    public bool HasTrailOfFire { get; set; } = false;
+
+    // Richochet Bounce Tracking
+    public int CurrentDashBounces { get; set; } = 0;
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Only count bounces off walls while actively dashing
+        if (StateMachine != null && StateMachine.CurrentState is PlayerDashingState)
+        {
+            bool isWall = collision.gameObject.name.Contains("Wall") || 
+                          (collision.transform.parent != null && collision.transform.parent.name.Contains("Wall"));
+            if (isWall)
+            {
+                CurrentDashBounces++;
+            }
+        }
+    }
 
     private void EquipWeapon(WeaponDataSO weapon)
     {

@@ -7,7 +7,7 @@ public class PlayerAimingState : PlayerState
 
     public override void Enter()
     {
-        player.SetTimeScale(0.1f);
+        player.SetTimeScale(0.1f * player.AimingTimeScaleModifier);
         player.SetTrajectoryLineEnabled(true);
         player.SetStartPosition(player.GetMouseWorldPosition());
     }

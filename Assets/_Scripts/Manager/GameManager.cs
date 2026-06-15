@@ -36,6 +36,15 @@ public class GameManager : MonoBehaviour
     public float KillTimeBonusModifier => killTimeBonusAddition;
     public int CurrentFloor => currentFloor;
 
+    // Upgrade modifiers
+    public float TimeHarvesterBonusPercent { get; set; } = 0f;
+    public int KineticMomentumBonusDamage { get; set; } = 0;
+    public bool IsGlassBladeActive { get; set; } = false;
+    public bool IsSatanicHourglassActive { get; set; } = false;
+
+    private int activeMutationsCount = 0;
+    private List<UpgradeCardSO> allUpgradeCards;
+
     private int killsInCurrentDash = 0;
     private Transform enemiesContainer;
     private Canvas uiCanvas;
@@ -61,6 +70,8 @@ public class GameManager : MonoBehaviour
     {
         PlayerLifeTime = initialPlayerLifeTime;
         LevelSurvivalTime = initialLevelSurvivalTime;
+
+        InitializeCards(); // Populates allUpgradeCards programmatically
 
         // Find UI components
         var uiGo = GameObject.Find("UI");
@@ -101,6 +112,7 @@ public class GameManager : MonoBehaviour
 
         // Determine player aiming state to apply triple drain speed (influenced by upgrades)
         float drainMultiplier = 1f;
+        bool playerAiming = false;
         var playerGo = GameObject.FindWithTag("Player");
         if (playerGo != null)
         {
@@ -108,11 +120,13 @@ public class GameManager : MonoBehaviour
             if (player != null && player.StateMachine != null && player.StateMachine.CurrentState is PlayerAimingState)
             {
                 drainMultiplier = 3f * aimingDrainMultiplierModifier;
+                playerAiming = true;
             }
         }
 
         // Run timers
-        PlayerLifeTime -= Time.deltaTime * drainMultiplier;
+        float idleDrainRate = IsSatanicHourglassActive ? 2f : 1f;
+        PlayerLifeTime -= Time.deltaTime * (playerAiming ? drainMultiplier : idleDrainRate);
         
         if (LevelSurvivalTime > 0f)
         {
@@ -336,9 +350,27 @@ public class GameManager : MonoBehaviour
         
         EnemiesRemaining--;
 
+        // Satanic Hourglass corrupted card effect: Freeze all other active enemies for 1s
+        if (IsSatanicHourglassActive)
+        {
+            FreezeAllEnemies(1.0f);
+        }
+
         if (EnemiesRemaining <= 0)
         {
             StartCoroutine(NextWaveRoutine());
+        }
+    }
+
+    public void FreezeAllEnemies(float duration)
+    {
+        var activeEnemies = FindObjectsOfType<EnemyController>();
+        foreach (var enemy in activeEnemies)
+        {
+            if (enemy != null)
+            {
+                enemy.Freeze(duration);
+            }
         }
     }
 
@@ -569,66 +601,41 @@ public class GameManager : MonoBehaviour
         col.radius = 0.5f;
     }
 
-    private List<UpgradeCard> GetUpgradeCards()
+    private void InitializeCards()
     {
-        var cards = new List<UpgradeCard>();
-        
-        var playerGo = GameObject.FindWithTag("Player");
-        Player player = playerGo != null ? playerGo.GetComponent<Player>() : null;
-
-        // Draft cards as requested, marked with [DRAFT] tag
-        cards.Add(new UpgradeCard(
-            "[DRAFT] SWIFT BLADE", 
-            "+20% LAUNCH POWER\n\nSlices faster and with greater velocity.", 
-            () => {
-                if (player != null) player.UpgradeWeaponPower(0.20f);
-            }
-        ));
-
-        cards.Add(new UpgradeCard(
-            "[DRAFT] CALM MIND", 
-            "HALVES AIM TIME DRAIN\n\nAiming slow-mo drains remaining lifetime 50% slower.", 
-            () => {
-                aimingDrainMultiplierModifier *= 0.5f;
-            }
-        ));
-
-        cards.Add(new UpgradeCard(
-            "[DRAFT] EXTENDED REACH", 
-            "+15% DRAG RANGE\n\nAllows for longer aiming drag slingshots.", 
-            () => {
-                if (player != null) player.UpgradeWeaponDrag(0.15f);
-            }
-        ));
-
-        cards.Add(new UpgradeCard(
-            "[DRAFT] SOUL HARVEST", 
-            "+1S TIME ON KILLS\n\nIncreases the lifetime gained from clearing enemies.", 
-            () => {
-                killTimeBonusAddition += 1.0f;
-            }
-        ));
-
-        cards.Add(new UpgradeCard(
-            "[DRAFT] REJUVENATION", 
-            "+20S LIFE RECOVERY\n\nInstantly restores 20 seconds of lifetime.", 
-            () => {
-                AddPlayerTime(20f);
-            }
-        ));
-
-        return cards;
+        allUpgradeCards = new List<UpgradeCardSO>
+        {
+            ScriptableObject.CreateInstance<DoubleDashCard>(),
+            ScriptableObject.CreateInstance<VacuumBladeCard>(),
+            ScriptableObject.CreateInstance<TrailOfFireCard>(),
+            ScriptableObject.CreateInstance<TimeHarvesterCard>(),
+            ScriptableObject.CreateInstance<AdrenalineRushCard>(),
+            ScriptableObject.CreateInstance<KineticMomentumCard>(),
+            ScriptableObject.CreateInstance<GlassBladeCard>(),
+            ScriptableObject.CreateInstance<SatanicHourglassCard>()
+        };
     }
 
-    private List<UpgradeCard> GetRandomCards(int count)
+    private List<UpgradeCardSO> GetRandomCards(int count)
     {
-        var allCards = GetUpgradeCards();
-        var selected = new List<UpgradeCard>();
-        while (selected.Count < count && allCards.Count > 0)
+        var pool = new List<UpgradeCardSO>();
+        foreach (var card in allUpgradeCards)
         {
-            int idx = Random.Range(0, allCards.Count);
-            selected.Add(allCards[idx]);
-            allCards.RemoveAt(idx);
+            if (card == null) continue;
+            // Mutation cards are limited to 1 active mutation
+            if (card.cardType == CardType.Mutation && activeMutationsCount >= 1)
+            {
+                continue;
+            }
+            pool.Add(card);
+        }
+
+        var selected = new List<UpgradeCardSO>();
+        while (selected.Count < count && pool.Count > 0)
+        {
+            int idx = Random.Range(0, pool.Count);
+            selected.Add(pool[idx]);
+            pool.RemoveAt(idx);
         }
         return selected;
     }
@@ -687,16 +694,19 @@ public class GameManager : MonoBehaviour
         titleRect.anchoredPosition = new Vector2(0, -30);
 
         // Get 3 random unique cards
-        List<UpgradeCard> chosenCards = GetRandomCards(3);
+        List<UpgradeCardSO> chosenCards = GetRandomCards(3);
 
         float startX = -200f;
         float spacingX = 200f;
+
+        var playerGo = GameObject.FindWithTag("Player");
+        Player player = playerGo != null ? playerGo.GetComponent<Player>() : null;
 
         for (int i = 0; i < chosenCards.Count; i++)
         {
             var card = chosenCards[i];
 
-            // Card Panel Button
+            // Card Panel Button - Outer border container
             var cardBtnGo = new GameObject($"CardButton_{i}");
             cardBtnGo.transform.SetParent(boxGo.transform, false);
             
@@ -704,20 +714,57 @@ public class GameManager : MonoBehaviour
             cardBtnRect.sizeDelta = new Vector2(175, 250);
             cardBtnRect.anchoredPosition = new Vector2(startX + i * spacingX, -30);
 
-            var cardImg = cardBtnGo.AddComponent<Image>();
-            cardImg.color = new Color(0.18f, 0.18f, 0.24f, 1f);
+            var borderImg = cardBtnGo.AddComponent<Image>();
+
+            // Setup border colors based on Category type
+            Color borderColor = Color.white;
+            switch (card.cardType)
+            {
+                case CardType.Mutation:
+                    borderColor = new Color(1.0f, 0.84f, 0.0f); // Gold/Yellow
+                    break;
+                case CardType.Passive:
+                    borderColor = new Color(0.0f, 0.95f, 1.0f); // Cyan
+                    break;
+                case CardType.Corrupted:
+                    borderColor = new Color(1.0f, 0.0f, 0.33f); // Crimson Red
+                    break;
+            }
+            borderImg.color = borderColor;
 
             var btn = cardBtnGo.AddComponent<Button>();
             
-            // Neon tint transition
+            // Inner Card panel
+            var innerGo = new GameObject("InnerPanel");
+            innerGo.transform.SetParent(cardBtnGo.transform, false);
+            var innerRect = innerGo.AddComponent<RectTransform>();
+            innerRect.anchorMin = Vector2.zero;
+            innerRect.anchorMax = Vector2.one;
+            innerRect.pivot = new Vector2(0.5f, 0.5f);
+            innerRect.sizeDelta = new Vector2(-8, -8); // 4-pixel border thickness
+
+            var innerImg = innerGo.AddComponent<Image>();
+            innerImg.color = new Color(0.18f, 0.18f, 0.24f, 1f);
+
+            btn.targetGraphic = innerImg;
+
+            // Hover/Press transitions
             ColorBlock cb = btn.colors;
             cb.normalColor = new Color(0.18f, 0.18f, 0.24f, 1f);
-            cb.highlightedColor = new Color(0.25f, 0.25f, 0.35f, 1f);
+            cb.highlightedColor = new Color(0.24f, 0.24f, 0.32f, 1f);
             cb.pressedColor = new Color(0.12f, 0.12f, 0.18f, 1f);
             btn.colors = cb;
 
             btn.onClick.AddListener(() => {
-                card.ApplyUpgrade();
+                if (player != null)
+                {
+                    card.ApplyUpgrade(player);
+                }
+
+                if (card.cardType == CardType.Mutation)
+                {
+                    activeMutationsCount++;
+                }
                 
                 // Resume game timescale
                 Time.timeScale = 1f;
@@ -728,9 +775,9 @@ public class GameManager : MonoBehaviour
 
             // Card Title text
             var cardTitleGo = new GameObject("CardTitle");
-            cardTitleGo.transform.SetParent(cardBtnGo.transform, false);
+            cardTitleGo.transform.SetParent(innerGo.transform, false);
             var cardTitleText = cardTitleGo.AddComponent<TextMeshProUGUI>();
-            cardTitleText.text = card.Name;
+            cardTitleText.text = card.cardName;
             cardTitleText.fontSize = 11;
             cardTitleText.color = Color.white;
             cardTitleText.alignment = TextAlignmentOptions.Center;
@@ -745,9 +792,9 @@ public class GameManager : MonoBehaviour
 
             // Card Description text
             var cardDescGo = new GameObject("CardDesc");
-            cardDescGo.transform.SetParent(cardBtnGo.transform, false);
+            cardDescGo.transform.SetParent(innerGo.transform, false);
             var cardDescText = cardDescGo.AddComponent<TextMeshProUGUI>();
-            cardDescText.text = card.Description;
+            cardDescText.text = card.cardDescription;
             cardDescText.fontSize = 9;
             cardDescText.color = new Color(0.8f, 0.8f, 0.8f);
             cardDescText.alignment = TextAlignmentOptions.Center;
@@ -802,19 +849,5 @@ public class GameManager : MonoBehaviour
 
         // Start Wave 1 on the new floor
         StartWave(1);
-    }
-}
-
-public class UpgradeCard
-{
-    public string Name;
-    public string Description;
-    public System.Action ApplyUpgrade;
-
-    public UpgradeCard(string name, string description, System.Action applyUpgrade)
-    {
-        Name = name;
-        Description = description;
-        ApplyUpgrade = applyUpgrade;
     }
 }
