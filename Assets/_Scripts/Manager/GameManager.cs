@@ -331,7 +331,6 @@ public class GameManager : MonoBehaviour
             // Apply scaling based on floor level
             float difficultyMultiplier = 1f + (currentFloor - 1) * 0.15f; // +15% move speed & score per floor
             scaledData.moveSpeed *= difficultyMultiplier;
-            scaledData.maxHealth += (currentFloor - 1) / 2; // +1 health every 2 floors
             scaledData.scoreValue = Mathf.RoundToInt(scaledData.scoreValue * difficultyMultiplier);
 
             controller.Initialize(scaledData);
@@ -686,7 +685,7 @@ public class GameManager : MonoBehaviour
         }
         if (pixelFont != null) titleText.font = pixelFont;
 
-        var titleRect = titleGo.AddComponent<RectTransform>();
+        var titleRect = titleGo.GetComponent<RectTransform>();
         titleRect.anchorMin = new Vector2(0.5f, 1f);
         titleRect.anchorMax = new Vector2(0.5f, 1f);
         titleRect.pivot = new Vector2(0.5f, 1f);
@@ -783,7 +782,7 @@ public class GameManager : MonoBehaviour
             cardTitleText.alignment = TextAlignmentOptions.Center;
             if (pixelFont != null) cardTitleText.font = pixelFont;
 
-            var ctRect = cardTitleGo.AddComponent<RectTransform>();
+            var ctRect = cardTitleGo.GetComponent<RectTransform>();
             ctRect.anchorMin = new Vector2(0.5f, 1f);
             ctRect.anchorMax = new Vector2(0.5f, 1f);
             ctRect.pivot = new Vector2(0.5f, 1f);
@@ -800,7 +799,7 @@ public class GameManager : MonoBehaviour
             cardDescText.alignment = TextAlignmentOptions.Center;
             if (pixelFont != null) cardDescText.font = pixelFont;
 
-            var cdRect = cardDescGo.AddComponent<RectTransform>();
+            var cdRect = cardDescGo.GetComponent<RectTransform>();
             cdRect.anchorMin = new Vector2(0.5f, 0.5f);
             cdRect.anchorMax = new Vector2(0.5f, 0.5f);
             cdRect.pivot = new Vector2(0.5f, 0.5f);

@@ -15,8 +15,8 @@ MonoBehaviour:
   enemyName: Blink Assassin
   enemyColor: {r: 0.66, g: 0, b: 1, a: 1}
   maxHealth: 1
-  scoreValue: 200
-  timeBonusOnKill: 2
+  scoreValue: 100
+  timeBonusOnKill: 5
   movementType: 2
   moveSpeed: 0
   actionCooldown: 2.5

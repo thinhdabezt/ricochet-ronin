@@ -186,7 +186,7 @@ public class EnemyController : MonoBehaviour
             Player player = collision.GetComponent<Player>();
             if (player != null)
             {
-                bool isDashing = player.StateMachine.CurrentState is PlayerDashingState;
+                bool isDashing = player.StateMachine != null && player.StateMachine.CurrentState is PlayerDashingState;
                 if (isDashing)
                 {
                     if (enemyData.specialMechanic == EnemySpecialMechanic.FrontShield)
@@ -412,7 +412,8 @@ public class EnemyController : MonoBehaviour
                 miniData.enemyName = "Mini Slime";
                 miniData.maxHealth = 1;
                 miniData.enemyColor = enemyData.enemyColor;
-                miniData.scoreValue = enemyData.scoreValue / 2;
+                miniData.scoreValue = 10; // Balanced: 10 score points
+                miniData.timeBonusOnKill = 0.5f; // Balanced: +0.5s time bonus
                 miniData.movementType = EnemyMovementType.ChasePlayer;
                 miniData.moveSpeed = enemyData.moveSpeed * 1.5f;
                 miniData.specialMechanic = EnemySpecialMechanic.None; // mini-slimes do not split

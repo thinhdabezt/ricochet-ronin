@@ -15,10 +15,10 @@ MonoBehaviour:
   enemyName: Weaver Drone
   enemyColor: {r: 1, g: 0.8, b: 0, a: 1}
   maxHealth: 1
-  scoreValue: 120
-  timeBonusOnKill: 2
+  scoreValue: 60
+  timeBonusOnKill: 3.5
   movementType: 1
-  moveSpeed: 1.5
+  moveSpeed: 2
   actionCooldown: 3
   specialMechanic: 4
   customEffectPrefab: {fileID: 0}

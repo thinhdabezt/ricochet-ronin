@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: NinjaData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
   enemyName: Ninja
-  maxHealth: 1
   enemyColor: {r: 1, g: 0, b: 0, a: 1}
-  scoreValue: 1
+  maxHealth: 1
+  scoreValue: 10
+  timeBonusOnKill: 1.5
+  movementType: 1
+  moveSpeed: 2.5
+  actionCooldown: 3
+  specialMechanic: 0
+  customEffectPrefab: {fileID: 0}

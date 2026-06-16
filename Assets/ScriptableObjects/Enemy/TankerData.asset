@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: TankerData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDataSO
   enemyName: Tanker
-  maxHealth: 3
   enemyColor: {r: 0, g: 1, b: 0.4980392, a: 1}
-  scoreValue: 2
+  maxHealth: 2
+  scoreValue: 25
+  timeBonusOnKill: 3
+  movementType: 3
+  moveSpeed: 1.5
+  actionCooldown: 3
+  specialMechanic: 0
+  customEffectPrefab: {fileID: 0}

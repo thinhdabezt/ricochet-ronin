@@ -2110,11 +2110,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   enemyPrefab: {fileID: 2660078653089840327, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
   enemyTypes:
+  - {fileID: 11400000, guid: 9af91de2cdc7d8c4281973825fb8eafd, type: 2}
+  - {fileID: 11400000, guid: 49f11873206c6d44b9d72c830106bbb1, type: 2}
   - {fileID: 11400000, guid: 30493bd94cf9fe24aa1156350040f6aa, type: 2}
-  - {fileID: 11400000, guid: 0fe68012bada11d43b1559e52f2fb118, type: 2}
-  - {fileID: 11400000, guid: 8681a741580cb2546b1d8c5acd4ec465, type: 2}
   - {fileID: 11400000, guid: 988a6ef6b28b28d4e8fe6f3c6c3ef057, type: 2}
   - {fileID: 11400000, guid: ed302918c267b91459519b604ed0bd55, type: 2}
+  - {fileID: 11400000, guid: 8681a741580cb2546b1d8c5acd4ec465, type: 2}
+  - {fileID: 11400000, guid: 0fe68012bada11d43b1559e52f2fb118, type: 2}
   initialPlayerLifeTime: 60
   initialLevelSurvivalTime: 120
 --- !u!114 &1876560755

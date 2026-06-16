@@ -17,10 +17,10 @@ public class ObjectPooler : MonoBehaviour
             if (_instance == null)
             {
                 _instance = FindObjectOfType<ObjectPooler>();
-                if (_instance != null)
-                {
-                    _instance.InitiatePool();
-                }
+            }
+            if (_instance != null)
+            {
+                _instance.InitiatePool();
             }
             return _instance;
         }
@@ -61,7 +61,7 @@ public class ObjectPooler : MonoBehaviour
 
     public void InitiatePool()
     {
-        if (isInitialized) return;
+        if (isInitialized && poolDictionary != null && prefabDictionary != null) return;
         isInitialized = true;
 
         // Khởi tạo danh sách
