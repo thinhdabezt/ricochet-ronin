@@ -316,8 +316,29 @@ public class GameManager : MonoBehaviour
     {
         if (enemyPrefab == null || enemyTypes.Length == 0) return;
 
-        // Bounds X: [-11, 11], Y: [-5, 5] to prevent spawning inside walls
-        Vector3 spawnPos = new Vector3(Random.Range(-11f, 11f), Random.Range(-5f, 5f), 0f);
+        // Find player to calculate spawn proximity safety check
+        GameObject playerGo = GameObject.FindWithTag("Player");
+        Vector3 spawnPos = Vector3.zero;
+        int attempts = 0;
+        bool validPosFound = false;
+
+        while (!validPosFound && attempts < 30)
+        {
+            spawnPos = new Vector3(Random.Range(-11f, 11f), Random.Range(-5f, 5f), 0f);
+            attempts++;
+
+            if (playerGo != null)
+            {
+                if (Vector3.Distance(spawnPos, playerGo.transform.position) >= 3.0f)
+                {
+                    validPosFound = true;
+                }
+            }
+            else
+            {
+                validPosFound = true;
+            }
+        }
 
         GameObject enemyGo = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, enemiesContainer);
         EnemyController controller = enemyGo.GetComponent<EnemyController>();
@@ -332,6 +353,23 @@ public class GameManager : MonoBehaviour
             float difficultyMultiplier = 1f + (currentFloor - 1) * 0.15f; // +15% move speed & score per floor
             scaledData.moveSpeed *= difficultyMultiplier;
             scaledData.scoreValue = Mathf.RoundToInt(scaledData.scoreValue * difficultyMultiplier);
+
+            // Capped health scaling: max +1 health on Floor 3-5, max +2 health on Floor 6+
+            int healthBonus = 0;
+            if (currentFloor >= 6)
+            {
+                healthBonus = 2;
+            }
+            else if (currentFloor >= 3)
+            {
+                healthBonus = 1;
+            }
+            scaledData.maxHealth += healthBonus;
+
+            // Action cooldown scaling: Cooldown Mới = Cooldown Gốc * [1 - (F - 1) * 0.05] (max 50% reduction)
+            float cooldownFactor = 1f - (currentFloor - 1) * 0.05f;
+            cooldownFactor = Mathf.Max(0.5f, cooldownFactor);
+            scaledData.actionCooldown *= cooldownFactor;
 
             controller.Initialize(scaledData);
         }

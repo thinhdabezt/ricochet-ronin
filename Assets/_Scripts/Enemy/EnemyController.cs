@@ -199,12 +199,25 @@ public class EnemyController : MonoBehaviour
                         if (dot > 0)
                         {
                             Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
+                            Vector3 contactPoint = (collision.transform.position + transform.position) * 0.5f;
+                            Vector2 bounceDir = ((Vector2)collision.transform.position - (Vector2)transform.position).normalized;
+
                             if (playerRb != null)
                             {
-                                // Deflect and bounce player back
-                                playerRb.linearVelocity = -playerRb.linearVelocity * 0.8f;
+                                // Deflect and bounce player back with 50% of old velocity
+                                playerRb.linearVelocity = -playerRb.linearVelocity * 0.5f;
                             }
-                            
+
+                            // Instantiate Spark Particles programmatically
+                            InstantiateSparkParticles(contactPoint, bounceDir);
+
+                            // Play iron steel metal clashing sound "KENG!" from Resources
+                            AudioClip clashClip = Resources.Load<AudioClip>("metal_clash");
+                            if (clashClip != null)
+                            {
+                                AudioSource.PlayClipAtPoint(clashClip, contactPoint);
+                            }
+
                             SpawnBlockedText();
                             CameraShake.Instance.ShakeCamera(2f, 0.08f);
                             return; // Ignore damage
@@ -291,14 +304,22 @@ public class EnemyController : MonoBehaviour
 
         float fuseDuration = 1.0f;
         float elapsed = 0f;
-        bool flash = false;
+        Vector3 baseScale = transform.localScale;
 
         while (elapsed < fuseDuration)
         {
-            flash = !flash;
-            sr.color = flash ? Color.red : enemyData.enemyColor;
-            elapsed += 0.1f;
-            yield return new WaitForSeconds(0.1f);
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / fuseDuration);
+
+            // Tween scale from 1.0 to 1.3
+            transform.localScale = baseScale * Mathf.Lerp(1.0f, 1.3f, t);
+
+            // Flashing frequency increases over time (5Hz to 25Hz)
+            float freq = Mathf.Lerp(5f, 25f, t);
+            bool showRed = Mathf.Sin(elapsed * freq * Mathf.PI * 2f) > 0f;
+            sr.color = showRed ? Color.red : enemyData.enemyColor;
+
+            yield return null;
         }
 
         ExplodeDetonation();
@@ -423,6 +444,44 @@ public class EnemyController : MonoBehaviour
 
             GameManager.Instance.RegisterSplitEnemy(1);
         }
+    }
+
+    private void InstantiateSparkParticles(Vector3 position, Vector2 direction)
+    {
+        GameObject sparksGo = new GameObject("SparkParticles");
+        sparksGo.transform.position = position;
+
+        ParticleSystem ps = sparksGo.AddComponent<ParticleSystem>();
+        
+        var main = ps.main;
+        main.startColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.15f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(4f, 8f);
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.2f, 0.5f);
+        main.gravityModifier = 1.2f;
+        main.duration = 0.5f;
+        main.loop = false;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 0;
+        emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 25) });
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 35f;
+        shape.radius = 0.1f;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        sparksGo.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+        var psr = sparksGo.GetComponent<ParticleSystemRenderer>();
+        if (psr != null)
+        {
+            psr.material = new Material(Shader.Find("Sprites/Default"));
+        }
+
+        ps.Play();
     }
 
     private void SpawnBlockedText()
