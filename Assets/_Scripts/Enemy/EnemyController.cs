@@ -19,6 +19,8 @@ public class EnemyController : MonoBehaviour
     private bool isFusing = false;
     private GameObject shieldObj;
     private bool isFrozen = false;
+    private Vector3 ninjaTargetPos;
+    private bool hasNinjaTarget = false;
 
     public void Initialize(EnemyDataSO data)
     {
@@ -33,6 +35,8 @@ public class EnemyController : MonoBehaviour
         GetComponent<Collider2D>().enabled = true;
         transform.localScale = Vector3.one * (data.enemyName == "Mini Slime" ? 0.5f : 1.0f);
 
+        hasNinjaTarget = false;
+
         SetupShieldVisual();
     }
 
@@ -41,6 +45,8 @@ public class EnemyController : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         initialPos = transform.position;
         playerTransform = GameObject.FindWithTag("Player")?.transform;
+
+        hasNinjaTarget = false;
 
         // Initialize if not already set by GameManager
         if (enemyData != null && currentHealth == 0)
@@ -90,20 +96,48 @@ public class EnemyController : MonoBehaviour
         switch (enemyData.movementType)
         {
             case EnemyMovementType.Patrol:
-                if (patrollingRight)
+                if (enemyData.enemyName == "Ninja")
                 {
-                    transform.position += Vector3.right * enemyData.moveSpeed * Time.deltaTime;
-                    if (transform.position.x >= initialPos.x + patrolRange)
+                    // Random 2D wander within a 4-unit radius of initialPos
+                    if (!hasNinjaTarget)
                     {
-                        patrollingRight = false;
+                        float randomAngle = Random.Range(0f, Mathf.PI * 2f);
+                        float randomDist = Random.Range(1.0f, 4.0f);
+                        Vector3 offset = new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f) * randomDist;
+                        ninjaTargetPos = initialPos + offset;
+
+                        // Clamp to play area bounds (X: [-11, 11], Y: [-5, 5])
+                        ninjaTargetPos.x = Mathf.Clamp(ninjaTargetPos.x, -11f, 11f);
+                        ninjaTargetPos.y = Mathf.Clamp(ninjaTargetPos.y, -5f, 5f);
+
+                        hasNinjaTarget = true;
+                    }
+
+                    transform.position = Vector3.MoveTowards(transform.position, ninjaTargetPos, enemyData.moveSpeed * Time.deltaTime);
+
+                    if (Vector3.Distance(transform.position, ninjaTargetPos) < 0.2f)
+                    {
+                        hasNinjaTarget = false;
                     }
                 }
                 else
                 {
-                    transform.position += Vector3.left * enemyData.moveSpeed * Time.deltaTime;
-                    if (transform.position.x <= initialPos.x - patrolRange)
+                    // Standard horizontal patrol
+                    if (patrollingRight)
                     {
-                        patrollingRight = true;
+                        transform.position += Vector3.right * enemyData.moveSpeed * Time.deltaTime;
+                        if (transform.position.x >= initialPos.x + patrolRange)
+                        {
+                            patrollingRight = false;
+                        }
+                    }
+                    else
+                    {
+                        transform.position += Vector3.left * enemyData.moveSpeed * Time.deltaTime;
+                        if (transform.position.x <= initialPos.x - patrolRange)
+                        {
+                            patrollingRight = true;
+                        }
                     }
                 }
                 break;
