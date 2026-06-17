@@ -327,6 +327,13 @@ public class GameManager : MonoBehaviour
             spawnPos = new Vector3(Random.Range(-11f, 11f), Random.Range(-5f, 5f), 0f);
             attempts++;
 
+            // Ensure not spawning inside a Wall collider (Layer 6)
+            int wallLayerMask = 1 << LayerMask.NameToLayer("Wall");
+            if (Physics2D.OverlapCircle(spawnPos, 0.4f, wallLayerMask) != null)
+            {
+                continue;
+            }
+
             if (playerGo != null)
             {
                 if (Vector3.Distance(spawnPos, playerGo.transform.position) >= 3.0f)

@@ -113,7 +113,16 @@ public class EnemyController : MonoBehaviour
                         hasNinjaTarget = true;
                     }
 
-                    transform.position = Vector3.MoveTowards(transform.position, ninjaTargetPos, enemyData.moveSpeed * Time.deltaTime);
+                    Vector3 nextPos = Vector3.MoveTowards(transform.position, ninjaTargetPos, enemyData.moveSpeed * Time.deltaTime);
+                    if (!IsPathBlockedByWall(nextPos))
+                    {
+                        transform.position = nextPos;
+                    }
+                    else
+                    {
+                        // Pick a new target next frame if blocked by a wall
+                        hasNinjaTarget = false;
+                    }
 
                     if (Vector3.Distance(transform.position, ninjaTargetPos) < 0.2f)
                     {
@@ -123,20 +132,29 @@ public class EnemyController : MonoBehaviour
                 else
                 {
                     // Standard horizontal patrol
+                    Vector3 nextPos = transform.position;
                     if (patrollingRight)
                     {
-                        transform.position += Vector3.right * enemyData.moveSpeed * Time.deltaTime;
-                        if (transform.position.x >= initialPos.x + patrolRange)
+                        nextPos += Vector3.right * enemyData.moveSpeed * Time.deltaTime;
+                        if (nextPos.x >= initialPos.x + patrolRange || IsPathBlockedByWall(nextPos))
                         {
                             patrollingRight = false;
+                        }
+                        else
+                        {
+                            transform.position = nextPos;
                         }
                     }
                     else
                     {
-                        transform.position += Vector3.left * enemyData.moveSpeed * Time.deltaTime;
-                        if (transform.position.x <= initialPos.x - patrolRange)
+                        nextPos += Vector3.left * enemyData.moveSpeed * Time.deltaTime;
+                        if (nextPos.x <= initialPos.x - patrolRange || IsPathBlockedByWall(nextPos))
                         {
                             patrollingRight = true;
+                        }
+                        else
+                        {
+                            transform.position = nextPos;
                         }
                     }
                 }
@@ -154,7 +172,29 @@ public class EnemyController : MonoBehaviour
             case EnemyMovementType.ChasePlayer:
                 if (playerTransform != null)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, playerTransform.position, enemyData.moveSpeed * Time.deltaTime);
+                    Vector3 targetPos = Vector3.MoveTowards(transform.position, playerTransform.position, enemyData.moveSpeed * Time.deltaTime);
+                    if (!IsPathBlockedByWall(targetPos))
+                    {
+                        transform.position = targetPos;
+                    }
+                    else
+                    {
+                        // Try sliding X only
+                        Vector3 targetPosX = transform.position + new Vector3(targetPos.x - transform.position.x, 0f, 0f);
+                        if (!IsPathBlockedByWall(targetPosX))
+                        {
+                            transform.position = targetPosX;
+                        }
+                        else
+                        {
+                            // Try sliding Y only
+                            Vector3 targetPosY = transform.position + new Vector3(0f, targetPos.y - transform.position.y, 0f);
+                            if (!IsPathBlockedByWall(targetPosY))
+                            {
+                                transform.position = targetPosY;
+                            }
+                        }
+                    }
                 }
                 break;
         }
@@ -189,8 +229,22 @@ public class EnemyController : MonoBehaviour
         // Teleport Effect
         ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.4f);
         
-        // Find random playable position within X: [-11, 11], Y: [-5, 5]
-        transform.position = new Vector3(Random.Range(-11f, 11f), Random.Range(-5f, 5f), 0f);
+        Vector3 newPos = transform.position;
+        int wallLayerMask = 1 << LayerMask.NameToLayer("Wall");
+        int attempts = 0;
+        bool validPos = false;
+
+        while (!validPos && attempts < 30)
+        {
+            newPos = new Vector3(Random.Range(-11f, 11f), Random.Range(-5f, 5f), 0f);
+            attempts++;
+            if (Physics2D.OverlapCircle(newPos, 0.4f, wallLayerMask) == null)
+            {
+                validPos = true;
+            }
+        }
+
+        transform.position = newPos;
 
         ObjectPooler.Instance.Spawn(PoolType.DeathVFX.ToString(), transform.position, Quaternion.identity, 0.4f);
     }
@@ -516,6 +570,18 @@ public class EnemyController : MonoBehaviour
         }
 
         ps.Play();
+    }
+
+    private bool IsPathBlockedByWall(Vector3 targetPos)
+    {
+        Vector2 dir = (targetPos - transform.position);
+        float dist = dir.magnitude;
+        if (dist == 0f) return false;
+
+        int wallLayerMask = 1 << LayerMask.NameToLayer("Wall");
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, 0.4f, dir.normalized, dist, wallLayerMask);
+
+        return hit.collider != null;
     }
 
     private void SpawnBlockedText()
