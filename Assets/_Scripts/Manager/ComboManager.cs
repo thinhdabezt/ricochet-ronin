@@ -23,6 +23,12 @@ public class ComboManager : MonoBehaviour
         // Broadcast event-driven updates for observers (HUD and Combo Spawner)
         GameEvents.OnEnemyKilled?.Invoke(position, currentCombo);
         GameEvents.OnComboChanged?.Invoke(currentCombo);
+
+        // Shake screen dynamically when a high-combo kill occurs (Triple Kill/Mega Kill)
+        if (currentCombo >= 3 && CameraJuice.Instance != null)
+        {
+            CameraJuice.Instance.TriggerScreenShake(0.3f, 0.4f);
+        }
     }
 
     private void Update()

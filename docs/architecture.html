@@ -130,6 +130,20 @@
             <li>Contains a <code>Setup(string value, Color color)</code> method to dynamically change the text value and color (e.g. Crimson for damage, Cyan for time penalities, Green for time gains).</li>
             <li>Floats upward at a set pixel speed and automatically returns to the pool after 0.8 seconds by setting <code>gameObject.SetActive(false)</code>.</li>
         </ul>
+
+        <h2>Juice & Aesthetics Setup</h2>
+        <p><strong>Files:</strong> <code>CameraJuice.cs</code> & <code>NeonSceneGenerator.cs</code></p>
+        <ul>
+            <li><code>CameraJuice</code>: Attached to the Main Camera. Uses DOTween to trigger a clean 2D screen shake on high combo kills (Triple Kill and above). Exposes <code>TriggerScreenShake(duration, strength)</code>.</li>
+            <li><code>NeonSceneGenerator</code>: A procedural setup tool for generating the "Neon Noir Minimalist Arcade" arena.
+                <ul>
+                    <li>Creates boundaries matching the camera aspect ratio with zero-friction, fully bouncy colliders.</li>
+                    <li>Procedurally generates a grid of thin neon-colored sprite lines.</li>
+                    <li>Automatically sets up URP Volume with custom Bloom (intensity 2.5), Vignette, and Chromatic Aberration.</li>
+                    <li>Exposes menu command (<code>Tools/Neon Noir Arcade/Generate Arena</code>) and runs at runtime start.</li>
+                </ul>
+            </li>
+        </ul>
     </div>
 </body>
 </html>
