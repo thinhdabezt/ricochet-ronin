@@ -48,8 +48,6 @@ public class GameManager : MonoBehaviour
     private int killsInCurrentDash = 0;
     private Transform enemiesContainer;
     private Canvas uiCanvas;
-    private TextMeshProUGUI waveText; // Will display PlayerLifeTime
-    private TextMeshProUGUI dashesText; // Will display LevelSurvivalTime
     private GameObject endGamePanel;
     private int lastSecondsRemaining = -1;
 
@@ -83,7 +81,6 @@ public class GameManager : MonoBehaviour
             enemiesContainer = new GameObject("Enemies").transform;
         }
 
-        SetupHUD();
         StartWave(1);
     }
 
@@ -154,99 +151,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SetupHUD()
-    {
-        if (uiCanvas == null) return;
 
-        // Find or create UI Text for Wave (displays TIME)
-        var waveGo = uiCanvas.transform.Find("Wave")?.gameObject;
-        if (waveGo == null)
-        {
-            waveGo = new GameObject("Wave");
-            waveGo.transform.SetParent(uiCanvas.transform, false);
-            waveText = waveGo.AddComponent<TextMeshProUGUI>();
-        }
-        else
-        {
-            waveText = waveGo.GetComponent<TextMeshProUGUI>();
-        }
-
-        // Find or create UI Text for Dashes (displays SURVIVE)
-        var dashesGo = uiCanvas.transform.Find("Dashes")?.gameObject;
-        if (dashesGo == null)
-        {
-            dashesGo = new GameObject("Dashes");
-            dashesGo.transform.SetParent(uiCanvas.transform, false);
-            dashesText = dashesGo.AddComponent<TextMeshProUGUI>();
-        }
-        else
-        {
-            dashesText = dashesGo.GetComponent<TextMeshProUGUI>();
-        }
-
-        // Find others to rearrange
-        var scoreGo = uiCanvas.transform.Find("Score")?.gameObject;
-        var comboGo = uiCanvas.transform.Find("Combo")?.gameObject;
-        var timerGo = uiCanvas.transform.Find("Timer")?.gameObject;
-
-        // Try to get QuinqueFive SDF font from Combo
-        TMP_FontAsset pixelFont = null;
-        if (comboGo != null)
-        {
-            var comboTextComp = comboGo.GetComponent<TextMeshProUGUI>();
-            if (comboTextComp != null)
-            {
-                pixelFont = comboTextComp.font;
-            }
-        }
-
-        // Programmatically configure and position all 5 HUD elements cleanly
-        ConfigureHUDText(waveGo, waveText, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -40), TextAlignmentOptions.Left, 18);
-        waveText.text = "";
-        
-        if (comboGo != null)
-        {
-            var comboTextComp = comboGo.GetComponent<TextMeshProUGUI>();
-            ConfigureHUDText(comboGo, comboTextComp, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -95), TextAlignmentOptions.Left, 18);
-        }
-
-        if (timerGo != null)
-        {
-            var timerTextComp = timerGo.GetComponent<TextMeshProUGUI>();
-            ConfigureHUDText(timerGo, timerTextComp, pixelFont, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -40), TextAlignmentOptions.Center, 18);
-        }
-
-        ConfigureHUDText(dashesGo, dashesText, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -40), TextAlignmentOptions.Right, 18);
-        dashesText.text = "";
-
-        if (scoreGo != null)
-        {
-            var scoreTextComp = scoreGo.GetComponent<TextMeshProUGUI>();
-            ConfigureHUDText(scoreGo, scoreTextComp, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -95), TextAlignmentOptions.Right, 18);
-        }
-    }
-
-    private void ConfigureHUDText(GameObject go, TextMeshProUGUI textComp, TMP_FontAsset font, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPos, TextAlignmentOptions alignment, float fontSize)
-    {
-        if (go == null || textComp == null) return;
-
-        if (font != null)
-        {
-            textComp.font = font;
-        }
-        textComp.fontSize = fontSize;
-        textComp.alignment = alignment;
-
-        var rect = go.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.pivot = pivot;
-            rect.sizeDelta = new Vector2(400, 50); // Set a wide size to prevent wrapping
-            rect.anchoredPosition = anchoredPos;
-        }
-    }
 
     public void StartWave(int waveNumber)
     {

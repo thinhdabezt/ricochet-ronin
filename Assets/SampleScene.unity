@@ -1393,6 +1393,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1053068659}
   m_CullTransparentMesh: 1
+--- !u!1 &1139788306
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1139788309}
+  - component: {fileID: 1139788308}
+  - component: {fileID: 1139788307}
+  m_Layer: 0
+  m_Name: RadialTimerImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1139788307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1139788306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0.95, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 3
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 2
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1139788308
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1139788306}
+  m_CullTransparentMesh: 1
+--- !u!224 &1139788309
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1139788306}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1837269957}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1251914372
 GameObject:
   m_ObjectHideFlags: 0
@@ -1456,6 +1531,7 @@ GameObject:
   - component: {fileID: 1291934280}
   - component: {fileID: 1291934279}
   - component: {fileID: 1291934278}
+  - component: {fileID: 1291934283}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -1548,6 +1624,31 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1291934283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291934277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b0a83337fc41e4b94e4f514c7bd9cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InGameHUDController
+  timeText: {fileID: 0}
+  scoreText: {fileID: 0}
+  comboText: {fileID: 0}
+  objectiveText: {fileID: 1002885620}
+  timeContainer: {fileID: 0}
+  scoreContainer: {fileID: 0}
+  comboContainer: {fileID: 0}
+  objectiveContainer: {fileID: 0}
+  timePrefix: 'TIME: '
+  scorePrefix: 'SCORE: '
+  comboPrefix: 'COMBO: '
+  objectivePrefix: 'Survive: '
+  objectiveSuffix: ' seconds remaining'
 --- !u!1 &1663829407
 GameObject:
   m_ObjectHideFlags: 0
@@ -1824,6 +1925,108 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &1837269953
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1837269957}
+  - component: {fileID: 1837269956}
+  - component: {fileID: 1837269955}
+  - component: {fileID: 1837269954}
+  m_Layer: 0
+  m_Name: PlayerDiegeticTimer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1837269954
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837269953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f423ca514316728439620fd757a1e113, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIDiegeticTimer
+  playerTransform: {fileID: 1985503983}
+  offset: {x: 0, y: 1.2, z: 0}
+  radialImage: {fileID: 1139788307}
+  maxTime: 100
+  remainingTime: 100
+--- !u!114 &1837269955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837269953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
+  m_UiScaleMode: 0
+  m_ReferencePixelsPerUnit: 100
+  m_ScaleFactor: 1
+  m_ReferenceResolution: {x: 800, y: 600}
+  m_ScreenMatchMode: 0
+  m_MatchWidthOrHeight: 0
+  m_PhysicalUnit: 3
+  m_FallbackScreenDPI: 96
+  m_DefaultSpriteDPI: 96
+  m_DynamicPixelsPerUnit: 10
+  m_PresetInfoIsWorld: 0
+--- !u!223 &1837269956
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837269953}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!224 &1837269957
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1837269953}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.015, y: 0.015, z: 0.015}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1139788309}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 1.2}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1876560750
 GameObject:
   m_ObjectHideFlags: 0
@@ -1836,6 +2039,8 @@ GameObject:
   - component: {fileID: 1876560751}
   - component: {fileID: 1876560753}
   - component: {fileID: 1876560754}
+  - component: {fileID: 1876560755}
+  - component: {fileID: 1876560756}
   m_Layer: 0
   m_Name: _GameManager
   m_TagString: Untagged
@@ -1855,7 +2060,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a1dbafafa7f3f74ca5de74e66905a85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
-  scoreText: {fileID: 1053068661}
 --- !u!4 &1876560752
 Transform:
   m_ObjectHideFlags: 0
@@ -1883,8 +2087,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99ff3a4f4f8b40043818df43acadb00e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComboManager
-  comboText: {fileID: 19764120}
-  timerText: {fileID: 1002885620}
 --- !u!114 &1876560754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1899,13 +2101,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   enemyPrefab: {fileID: 2660078653089840327, guid: 7e252a9a1a5b42b4cbdddea8dad5790d, type: 3}
   enemyTypes:
+  - {fileID: 11400000, guid: 9af91de2cdc7d8c4281973825fb8eafd, type: 2}
+  - {fileID: 11400000, guid: 49f11873206c6d44b9d72c830106bbb1, type: 2}
   - {fileID: 11400000, guid: 30493bd94cf9fe24aa1156350040f6aa, type: 2}
-  - {fileID: 11400000, guid: 0fe68012bada11d43b1559e52f2fb118, type: 2}
-  - {fileID: 11400000, guid: 8681a741580cb2546b1d8c5acd4ec465, type: 2}
   - {fileID: 11400000, guid: 988a6ef6b28b28d4e8fe6f3c6c3ef057, type: 2}
   - {fileID: 11400000, guid: ed302918c267b91459519b604ed0bd55, type: 2}
+  - {fileID: 11400000, guid: 8681a741580cb2546b1d8c5acd4ec465, type: 2}
+  - {fileID: 11400000, guid: 0fe68012bada11d43b1559e52f2fb118, type: 2}
   initialPlayerLifeTime: 60
   initialLevelSurvivalTime: 120
+--- !u!114 &1876560755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876560750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5ecac4d26122a246bf68da2b732dec0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIComboSpawner
+  comboPrefab: {fileID: 7857103550707883384, guid: 66a99da383987af48ba8dcaaa781c574, type: 3}
+  poolSize: 15
+  normalComboColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  specialComboColor: {r: 1, g: 0.5, b: 0, a: 1}
+  megaComboColor: {r: 1, g: 0, b: 0, a: 1}
+--- !u!114 &1876560756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1876560750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af0ec55ffdb7a544db3bd2b8289a2e00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TextMeshProBezierSpawner
+  textPrefab: {fileID: 3762526522420782501, guid: 69271837c84fbdd4094d863db9333a47, type: 3}
+  poolSize: 20
+  fontAsset: {fileID: 11400000, guid: 6ed226dc589f9174bbe3e1c9b2602345, type: 2}
+  outlineWidth: 0.25
+  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  timeColor: {r: 0, g: 1, b: 0.5, a: 1}
+  timeDuration: 0.4
+  timeTravelDistance: 2
+  timePunchScaleAmount: 0.2
+  scoreColor: {r: 1, g: 0.84, b: 0, a: 1}
+  scoreDuration: 0.5
+  scoreStartOffset: {x: 0.5, y: 0}
+  scoreArcHeight: 1.2
+  scoreArcDistance: 1.2
+  scoreTargetScale: 1.2
 --- !u!1 &1985503981
 GameObject:
   m_ObjectHideFlags: 0
@@ -2203,3 +2451,4 @@ SceneRoots:
   - {fileID: 1876560752}
   - {fileID: 1251914374}
   - {fileID: 20510417}
+  - {fileID: 1837269957}
