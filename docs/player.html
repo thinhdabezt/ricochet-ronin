@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player & State Machine - Ricochet Ronin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>RICOCHET RONIN</h2>
+        <div class="sidebar-subtitle">Codebase Guide</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Overview & Concept</a></li>
+            <li><a href="architecture.html">Architecture & Managers</a></li>
+            <li><a href="player.html" class="active">Player & State Machine</a></li>
+            <li><a href="enemies.html">Enemies & Combat AI</a></li>
+            <li><a href="upgrades.html">Upgrade Cards (Roguelike)</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Player & <span class="highlight">State Machine</span></h1>
+        <p>The player character's movement and actions are governed by a robust state machine. Rather than packing all conditions into a single monolithic script, behaviors are distributed across discrete, isolated states.</p>
+
+        <div class="callout warning">
+            <div class="callout-title">⚠️ Class Name Notice</div>
+            <p>The source file is named <strong><code>PlayerController.cs</code></strong>, but the main MonoBehavior class inside it is named <strong><code>Player</code></strong>.</p>
+        </div>
+
+        <h2>State Machine Architecture</h2>
+        <p>The player uses the classes <code>PlayerStateMachine</code>, <code>PlayerState</code>, and <code>Player</code> to manage transitions. The three main states are:</p>
+
+        <div class="grid">
+            <!-- Idle -->
+            <div class="card cyan">
+                <h3>PlayerIdleState</h3>
+                <p><strong>File:</strong> <code>PlayerIdleState.cs</code></p>
+                <p>The default resting state. The player is stationary. The system monitors for mouse clicks to initiate slow-motion aiming.</p>
+                <ul>
+                    <li>Transition: Left-click &rarr; <code>PlayerAimingState</code>.</li>
+                </ul>
+            </div>
+
+            <!-- Aiming -->
+            <div class="card yellow">
+                <h3>PlayerAimingState</h3>
+                <p><strong>File:</strong> <code>PlayerAimingState.cs</code></p>
+                <p>Activated when pulling back the slingshot. Controls time-dilation and trajectory simulation.</p>
+                <ul>
+                    <li>Enters slow motion by scaling time: <code>Time.timeScale = 0.1f * player.AimingTimeScaleModifier</code>.</li>
+                    <li>Saves drag starting location.</li>
+                    <li>Computes drag direction vector: <code>(startPos - currentMousePos).normalized</code>.</li>
+                    <li>Simulates trajectory paths dynamically in <code>Update()</code>.</li>
+                    <li>Transition on Release:
+                        <ul>
+                            <li>If drag distance &gt; 0.5f &rarr; <code>PlayerDashingState</code>.</li>
+                            <li>If drag distance &le; 0.5f &rarr; <code>PlayerIdleState</code> (Cancel aim).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Dashing -->
+            <div class="card crimson">
+                <h3>PlayerDashingState</h3>
+                <p><strong>File:</strong> <code>PlayerDashingState.cs</code></p>
+                <p>The high-speed movement state. Handles collisions, speed decay, and active mutations.</p>
+                <ul>
+                    <li>Resets bounce counter and launches the player.</li>
+                    <li>If the <strong>Double Dash</strong> mutation is active, pressing left-click mid-dash will consume 5s of life time and return the player to <code>PlayerAimingState</code> for redirection.</li>
+                    <li>Monitors speed in <code>Update()</code>. Returns to <code>PlayerIdleState</code> when linear velocity drops below <code>0.15f</code> after a minimum duration (<code>0.15s</code>).</li>
+                    <li>Applies active mutations in <code>FixedUpdate()</code>:
+                        <ul>
+                            <li><code>Vacuum Blade</code>: Pulls nearby enemies towards player path.</li>
+                            <li><code>Trail of Fire</code>: Spawns damaging fire triggers.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Core Mechanics & Math</h2>
+
+        <h3>Slingshot Launch Physics</h3>
+        <p>Launched force is calculated inside the <code>LaunchPlayer()</code> method in <code>Player.cs</code>. It calculates the displacement between drag start and end positions, clamps the magnitude to prevent excessive speeds, and applies an impulse force:</p>
+        <pre><code>// 1. Calculate force vector (slingshot action: start - end)
+Vector2 forceVector = startPosition - endPosition;
+
+// 2. Clamp to weapon's maximum allowed drag distance
+Vector2 clampedForce = Vector2.ClampMagnitude(forceVector, currentWeapon.maxDragDistance);
+
+// 3. Scale with weapon power multipliers
+float finalPower = basePower * currentWeapon.powerMultiplier;
+
+// 4. Apply instantaneous impulse
+rb.AddForce(clampedForce * finalPower, ForceMode2D.Impulse);</code></pre>
+
+        <h3>Trajectory Prediction & Reflection Math</h3>
+        <p>The <code>DrawTrajectory(Vector2 startPos, Vector2 direction)</code> method calculates bounce lines recursively (up to 2 bounces) utilizing 2D raycasts and mathematical vector reflections:</p>
+        <pre><code>// 1. First Raycast check (Start -> Wall 1)
+RaycastHit2D hit1 = Physics2D.Raycast(startPos, direction, 50f, collisionLayers);
+if (hit1.collider != null) {
+    lr.SetPosition(1, hit1.point);
+    
+    // 2. Compute reflection vector
+    Vector2 reflectDirection = Vector2.Reflect(direction, hit1.normal);
+    
+    // 3. Second Raycast check (Wall 1 -> Wall 2)
+    RaycastHit2D hit2 = Physics2D.Raycast(hit1.point + reflectDirection * 0.1f, reflectDirection, 50f, collisionLayers);
+    if (hit2.collider != null) {
+        lr.SetPosition(2, hit2.point);
+    } else {
+        lr.SetPosition(2, hit1.point + reflectDirection * 10f);
+    }
+}</code></pre>
+
+        <h3>Bounces and Collision Checks</h3>
+        <p>Wall bounces are registered inside <code>OnCollisionEnter2D</code> of the <code>Player</code> component. It checks if the collided object name contains "Wall". The bounce count (<code>CurrentDashBounces</code>) is stored, which is utilized by upgrades like <strong>Kinetic Momentum</strong> to scale damage output.</p>
+    </div>
+</body>
+</html>

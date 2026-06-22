@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enemies & AI - Ricochet Ronin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>RICOCHET RONIN</h2>
+        <div class="sidebar-subtitle">Codebase Guide</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Overview & Concept</a></li>
+            <li><a href="architecture.html">Architecture & Managers</a></li>
+            <li><a href="player.html">Player & State Machine</a></li>
+            <li><a href="enemies.html" class="active">Enemies & Combat AI</a></li>
+            <li><a href="upgrades.html">Upgrade Cards (Roguelike)</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Enemies & <span class="highlight">Combat AI</span></h1>
+        <p>Enemies are central to the game loop. The AI architecture allows combining different movement behaviors with special mechanics to create unique, challenging encounters. These are configured via <code>EnemyDataSO</code> assets and executed dynamically by <code>EnemyController</code>.</p>
+
+        <h2>Enemy Movement Types</h2>
+        <p>Defined by the <code>EnemyMovementType</code> enum, movement patterns are executed inside the <code>Update()</code> loop of <code>EnemyController.cs</code>:</p>
+
+        <div class="grid">
+            <!-- Static & Patrol -->
+            <div class="card cyan">
+                <h3>Static & Patrol</h3>
+                <ul>
+                    <li><strong>Static:</strong> The enemy does not move. Useful for basic training dummies.</li>
+                    <li><strong>Patrol (Standard):</strong> Moves horizontally back and forth between coordinates. Flips directions if blocked by a wall.</li>
+                    <li><strong>Patrol (Ninja variant):</strong> wanders randomly within a 4-unit radius of its initial spawn position, clamping to arena bounds and recalculating paths if blocked.</li>
+                </ul>
+            </div>
+
+            <!-- Chase & Blink -->
+            <div class="card yellow">
+                <h3>Chase & Blink</h3>
+                <ul>
+                    <li><strong>ChasePlayer:</strong> Constantly moves towards the player position. Features a sliding algorithm: if directly blocked by a wall, it attempts to slide along the X-axis alone or the Y-axis alone.</li>
+                    <li><strong>Blink:</strong> Teleports to a random coordinates inside the arena at intervals based on the enemy's action cooldown. Triggers teleport dust VFX.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Special Combat Mechanics</h2>
+        <p>Defined by the <code>EnemySpecialMechanic</code> enum, these add defensive layers or dangerous hazards:</p>
+
+        <h3>1. FrontShield (Vanguard Shield)</h3>
+        <p>Spawns a child object with a cyan overlay representing a front shield. The enemy slowly rotates to face the player (at 120&deg;/second, allowing skilled players to launch behind them).</p>
+        <div class="callout warning">
+            <div class="callout-title">🛡️ Shield Block Formula</div>
+            <p>Upon collision with a dashing player, the script computes the dot product of the enemy's facing direction (right vector) and the player's relative position:</p>
+            <pre><code>Vector2 relativePlayerPos = player.transform.position - transform.position;
+float dot = Vector2.Dot(relativePlayerPos, transform.right);
+if (dot > 0) {
+    // Blocked!
+}</code></pre>
+            <p>If <code>dot &gt; 0</code>, the player is in the front hemisphere. The shield blocks all damage, bounces the player backward with 50% velocity, triggers a sparks particle burst, plays the metal clash SFX, and shakes the camera.</p>
+        </div>
+
+        <h3>2. ExplodeOnDeath (Bomber)</h3>
+        <p>When HP falls to 0, instead of dying immediately, the enemy enters a fuse state (<code>FusingRoutine</code>):</p>
+        <ul>
+            <li>Disables its colliders to prevent further damage.</li>
+            <li>Lerps (tweens) its scale up by +30%.</li>
+            <li>Flashes rapidly between its normal color and solid red (increasing frequency from 5Hz to 25Hz).</li>
+            <li>After a 1-second fuse, it detonates: shakes the screen, applies a massive knockback force to players within a 3-unit radius, and penalizes player life time by 10 seconds.</li>
+        </ul>
+
+        <h3>3. SplitOnDeath (Mitosis Slime)</h3>
+        <p>Upon death, it instantiates two <strong>Mini Slimes</strong> at its position. The Mini Slimes have:</p>
+        <ul>
+            <li>Only 1 HP and reward 10 points.</li>
+            <li>No special mechanics (they do not split again).</li>
+            <li><code>ChasePlayer</code> movement type with a 1.5x speed boost.</li>
+            <li>Registers itself in the GameManager count to prevent premature floor clears.</li>
+        </ul>
+
+        <h3>4. WeaverDrone (Slow Zone Spawner)</h3>
+        <p>Spawns purple, semi-translucent circular triggers called <code>SlowZone</code> at its position. The slow zones last for 4 seconds. Any player touching the trigger will have their velocity scaled down by <code>0.85x</code> every frame (85% drag penalty, making aiming out of the zone extremely urgent).</p>
+
+        <h2>Hit Registration Rules</h2>
+        <ul>
+            <li><strong>When Player is Dashing:</strong> Enemy takes damage. Saturated damage is <code>1</code> (or <code>3</code> if <em>Glass Blade</em> is active) plus <code>KineticMomentumBonusDamage</code> multiplied by the number of wall bounces made during the current dash.</li>
+            <li><strong>When Player is Idle/Aiming (Vulnerable):</strong> Player is hit. Penalizes life time by 10s (25s if <em>Glass Blade</em> is active), shakes camera, and applies a strong knockback force away from the enemy.</li>
+        </ul>
+    </div>
+</body>
+</html>

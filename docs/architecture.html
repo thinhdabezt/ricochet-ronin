@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture & Managers - Ricochet Ronin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>RICOCHET RONIN</h2>
+        <div class="sidebar-subtitle">Codebase Guide</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Overview & Concept</a></li>
+            <li><a href="architecture.html" class="active">Architecture & Managers</a></li>
+            <li><a href="player.html">Player & State Machine</a></li>
+            <li><a href="enemies.html">Enemies & Combat AI</a></li>
+            <li><a href="upgrades.html">Upgrade Cards (Roguelike)</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Global Systems & <span class="highlight">Architecture</span></h1>
+        <p>The codebase utilizes a modular, event-driven architecture to keep responsibilities separate. Rather than binding all mechanics directly to the player, global state management, scoring, and visuals are distributed across dedicated singletons and managers.</p>
+
+        <h2>Central Managers</h2>
+        
+        <div class="grid">
+            <!-- GameManager -->
+            <div class="card cyan">
+                <h3>GameManager</h3>
+                <p><strong>File:</strong> <code>Assets/_Scripts/Manager/GameManager.cs</code></p>
+                <p>The central singleton managing general state (Playing, Victory, GameOver), floor progressions, timers, and upgrades.</p>
+                <ul>
+                    <li>Manages <code>PlayerLifeTime</code> (depleting every frame) and <code>LevelSurvivalTime</code>.</li>
+                    <li>Scales enemy difficulty (HP, speed, cooldowns) as the floor advances.</li>
+                    <li>Triggers the Roguelike upgrade selection UI on floor clear.</li>
+                    <li>Spawns the level transition portal (Portal.cs) on floor clear.</li>
+                </ul>
+            </div>
+
+            <!-- Score & Combo Managers -->
+            <div class="card yellow">
+                <h3>Score & Combo Managers</h3>
+                <p><strong>Files:</strong> <code>ScoreManager.cs</code> & <code>ComboManager.cs</code></p>
+                <p>Dedicated scripts separating score accumulation and combo timeout mechanics from the main gameplay loops.</p>
+                <ul>
+                    <li><code>ScoreManager</code> aggregates score points upon receiving enemy death events.</li>
+                    <li><code>ComboManager</code> tracks consecutive kills within a 2-second decay window. Under the hood, it triggers screen alerts and relays combo tiers back to the UI.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Event Bus Pattern (GameEvents)</h2>
+        <p><strong>File:</strong> <code>Assets/_Scripts/Manager/GameEvents.cs</code></p>
+        <p>To prevent tight coupling between managers, the player, and the UI, the game uses static delegates. Below is a breakdown of the active events:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Parameters</th>
+                    <th>Publisher</th>
+                    <th>Subscribers / Listeners</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>OnEnemyDie</code></td>
+                    <td><code>int score, Vector2 position</code></td>
+                    <td>EnemyController</td>
+                    <td>ScoreManager, ComboManager, GameManager</td>
+                </tr>
+                <tr>
+                    <td><code>OnPlayerDash</code></td>
+                    <td>None</td>
+                    <td>PlayerDashingState</td>
+                    <td>GameManager</td>
+                </tr>
+                <tr>
+                    <td><code>OnEnemyKilled</code></td>
+                    <td><code>Vector2 position, int comboCount</code></td>
+                    <td>ComboManager</td>
+                    <td>UIComboSpawner</td>
+                </tr>
+                <tr>
+                    <td><code>OnScoreAndTimeGained</code></td>
+                    <td><code>Vector2 pos, int score, float time</code></td>
+                    <td>EnemyController</td>
+                    <td>UI Score Tracker / Floating Text (If any)</td>
+                </tr>
+                <tr>
+                    <td><code>OnScoreChanged</code></td>
+                    <td><code>int currentScore</code></td>
+                    <td>ScoreManager</td>
+                    <td>InGameHUDController</td>
+                </tr>
+                <tr>
+                    <td><code>OnComboChanged</code></td>
+                    <td><code>int currentCombo</code></td>
+                    <td>ComboManager</td>
+                    <td>InGameHUDController</td>
+                </tr>
+                <tr>
+                    <td><code>OnSurvivalTimeChanged</code></td>
+                    <td><code>int secondsRemaining</code></td>
+                    <td>GameManager</td>
+                    <td>InGameHUDController</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Performance: Object Pooling</h2>
+        <p><strong>Files:</strong> <code>ObjectPooler.cs</code> & <code>PoolObject.cs</code> (in <code>Assets/_Scripts/Manager/</code>)</p>
+        <p>To avoid massive garbage collection overhead and frame drops (lag spikes) due to frequent <code>Instantiate()</code> and <code>Destroy()</code> calls for floating texts and explosion effects, an Object Pool is implemented.</p>
+        
+        <div class="callout tip">
+            <div class="callout-title">💡 Pool Usage</div>
+            <p>To spawn a pooled object (e.g. damage indicators), call the singleton method:</p>
+            <pre><code>ObjectPooler.Instance.Spawn(string key, Vector3 position, Quaternion rotation, float autoReturnTime);</code></pre>
+            <p>Spawning keys are bound to pool names such as <code>PoolType.DamageText.ToString()</code> or <code>PoolType.DeathVFX.ToString()</code>.</p>
+        </div>
+
+        <h3>DamageText Floating Indicator</h3>
+        <p><strong>File:</strong> <code>Assets/_Scripts/Manager/DamageText.cs</code></p>
+        <ul>
+            <li>Automatically assigns itself as a child of the Canvas hierarchy upon initialization.</li>
+            <li>Contains a <code>Setup(string value, Color color)</code> method to dynamically change the text value and color (e.g. Crimson for damage, Cyan for time penalities, Green for time gains).</li>
+            <li>Floats upward at a set pixel speed and automatically returns to the pool after 0.8 seconds by setting <code>gameObject.SetActive(false)</code>.</li>
+        </ul>
+    </div>
+</body>
+</html>

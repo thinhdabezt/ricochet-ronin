@@ -1,0 +1,100 @@
+# Ricochet Ronin - Agent Skills & Repository Rules
+
+This file outlines the core skills, rules, and workflows that AI agents must follow when modifying the **Ricochet Ronin** codebase.
+
+---
+
+## 🛠️ Tech Stack & Architecture Overview
+*   **Engine:** Unity (2D view, Physics2D engine).
+*   **Language:** C# (C# 9+ features allowed by Unity version).
+*   **Design Patterns:** State Machine (Player), Singleton (Managers), Strategy (Upgrades), and Event Bus (GameEvents).
+*   **UI System:** TextMeshPro (TMP) & DOTween for screen juice.
+*   **Performance:** Custom Object Pooling for DamageText and DeathVFX.
+
+---
+
+## 📂 Core Component Locations
+When asked to modify features, locate files here:
+*   **Player & States:** `Assets/_Scripts/Player/`
+*   **Enemy AI & Mechanics:** `Assets/_Scripts/Enemy/`
+*   **Managers (Score, Combo, Time Loop):** `Assets/_Scripts/Manager/`
+*   **Upgrade Cards (Roguelike):** `Assets/_Scripts/ScriptableObjects/`
+*   **UI & Screens:** `Assets/_Scripts/UI/`
+*   **Project Documentation:** `docs/index.html` (Use this HTML directory to study the codebase fast).
+
+---
+
+## 📜 Coding Skills & Rules
+
+### 1. ScriptableObject Lifecycle Rule
+> [!CAUTION]
+> **Never modify ScriptableObject assets directly at runtime.**
+> Modifying SO fields in playmode alters the assets on disk permanently. Always instantiate a runtime copy of the SO before applying modifiers (e.g. scaling HP or changing color).
+
+*   **Correct Practice (GameManager.cs / Player.cs):**
+    ```csharp
+    // Instantiate a runtime clone of the ScriptableObject
+    EnemyDataSO scaledData = Instantiate(baseData);
+    scaledData.moveSpeed *= difficultyMultiplier;
+    controller.Initialize(scaledData);
+    ```
+
+### 2. Event-Driven Communication Rule
+> [!IMPORTANT]
+> **Use the Event Bus (`GameEvents.cs`) for cross-module notifications.**
+> Do not couple enemy or player scripts directly to scoring, combo tracking, or UI controllers.
+
+*   Publish an event: `GameEvents.OnEnemyDie?.Invoke(score, position);`
+*   Subscribe/Unsubscribe: Always clean up handlers in `OnDisable()` or `OnDestroy()` to prevent memory leaks:
+    ```csharp
+    private void OnEnable() => GameEvents.OnEnemyDie += HandleEnemyKilled;
+    private void OnDisable() => GameEvents.OnEnemyDie -= HandleEnemyKilled;
+    ```
+
+### 3. Physics & Velocity Rule
+*   Launcher forces must be applied as instantaneous forces: `Rigidbody2D.AddForce(force, ForceMode2D.Impulse)`.
+*   Wall bounces are controlled via `PhysicsMaterial2D` for bounce, and Rigidbody's linear drag for friction. Avoid hard-coding coordinate bounces; let the Unity physics engine handle it.
+
+### 4. Performance & Object Spawning Rule
+*   Never use `Instantiate` or `Destroy` directly for transient elements (damage text indicators, explosion particles, slash triggers). Always use the pooling mechanism:
+    ```csharp
+    GameObject textObj = ObjectPooler.Instance.Spawn(PoolType.DamageText.ToString(), position, rotation, lifetime);
+    ```
+
+### 5. UI Animations & Tweens
+*   For screen juice (visual bounces, text scale punches, color shifts), use **DOTween**.
+*   Always check if an active tween exists and kill it before assigning a new one to prevent overrides or leaks:
+    ```csharp
+    if (scoreTween != null && scoreTween.IsActive()) scoreTween.Kill();
+    ```
+
+---
+
+## 🛠️ Unity & Coplay MCP Development Guidelines
+
+When modifying scenes, prefabs, or writing scripts inside Unity, leverage the `coplay-mcp` server tools effectively:
+1.  **Check Editor State:** Before performing operations on scenes or assets, verify the state of the editor with `get_unity_editor_state`. Ensure you are working in the active scene (`Assets/SampleScene.unity`).
+2.  **Verify Hierarchies:** Use `list_game_objects_in_hierarchy` to locate scripts attached to game elements. For components in prefab contexts, locate prefabs using `list_all_prefabs_with_bounding_boxes`.
+3.  **Run Playmode Tests:** Test gameplay modifications programmatically by triggering play sessions using `play_game` and stopping them using `stop_game`.
+4.  **Inspect Runtime Logs:** If scripts produce unexpected behaviors, inspect console logs and error stacks using `get_unity_logs` to diagnose exceptions.
+
+---
+
+## 📚 Documentation Synchronicity Rule
+> [!IMPORTANT]
+> **Any code or architecture change must be synchronized with the project's documentation.**
+> The documentation in the `docs/` folder is the primary quick-start reference. If you add, modify, or remove any core gameplay mechanics, player states, AI types, cards, or system managers, you **MUST** update the corresponding HTML documentation file:
+> *   If player states or trajectory math change &rarr; Update `docs/player.html`.
+> *   If new enemies or mechanics are created &rarr; Update `docs/enemies.html`.
+> *   If upgrades, cards, or modifiers change &rarr; Update `docs/upgrades.html`.
+> *   If global manager structures, events, or pools change &rarr; Update `docs/architecture.html`.
+
+---
+
+## 🔍 Verification & Compilation Checklist
+Before declaring any task completed:
+1.  **Run Compilation Check:** Propose `check_compile_errors` using the Unity coplay MCP server to ensure there are no compilation errors in the Unity assembly.
+2.  **Verify Event Registry:** Ensure all newly registered events have proper subscription-unsubscription setups.
+3.  **Validate Upgrade Layouts:** If adding new cards, ensure they inherit from `UpgradeCardSO`, implement the `ApplyUpgrade(Player player)` strategy method, and set category colors matching the UI requirements (Mutation = Gold, Passive = Cyan, Corrupted = Crimson).
+4.  **Verify Documentation Sync:** Verify that the `docs/` folder reflects the updated states of the project.
+

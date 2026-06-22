@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ricochet Ronin - Codebase Guide</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>RICOCHET RONIN</h2>
+        <div class="sidebar-subtitle">Codebase Guide</div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Overview & Concept</a></li>
+            <li><a href="architecture.html">Architecture & Managers</a></li>
+            <li><a href="player.html">Player & State Machine</a></li>
+            <li><a href="enemies.html">Enemies & Combat AI</a></li>
+            <li><a href="upgrades.html">Upgrade Cards (Roguelike)</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Welcome to <span class="highlight">Ricochet Ronin</span> Documentation</h1>
+        <p>This documentation acts as a quick-start guide and comprehensive design blueprint for the <strong>Ricochet Ronin</strong> codebase. It is designed to help AI agents and developers immediately understand the game architecture, systems, state machines, and interactions without scanning through the entire raw source code.</p>
+
+        <div class="callout tip">
+            <div class="callout-title">💡 Agent Instructions</div>
+            <p>Use these HTML documents as your primary source of truth for design patterns, file locations, properties, and interactions. Before editing files, refer to these guides to understand the established design practices of this repository.</p>
+        </div>
+
+        <h2>High Concept</h2>
+        <p><strong>"Billiards meets Samurai"</strong></p>
+        <p>Ricochet Ronin is a high-speed, top-down physics action game. The player controls a samurai who cannot run or walk normally. Instead, the samurai slingshots themselves at high velocity like a billiard ball to slice through enemies, ricocheting off walls to maintain momentum and compile combos.</p>
+
+        <h2>Core Gameplay Loop</h2>
+        <p>The rhythm of the gameplay is defined as: <strong>Still (Aim) &rarr; Motion (Dash) &rarr; Still (Aim)</strong>.</p>
+        <div class="grid">
+            <div class="card cyan">
+                <h3>1. Aim Phase</h3>
+                <p>Hold mouse/touch to slow down time. Drag in the opposite direction (slingshot mechanical action). The system computes a 2-bounce trajectory prediction line using vector reflections.</p>
+            </div>
+            <div class="card yellow">
+                <h3>2. Dash Phase</h3>
+                <p>Release mouse to launch at high speed. The samurai slides, ricocheting off wall colliders using a physics material. Passing through enemies slashes them instantly.</p>
+            </div>
+            <div class="card crimson">
+                <h3>3. Reset Phase</h3>
+                <p>As friction slows the player down below a certain threshold, the player stops and enters the Idle state, preparing for the next slingshot dash.</p>
+            </div>
+        </div>
+
+        <h2>Game Core Variables</h2>
+        <ul>
+            <li><strong>Player Life Time:</strong> Serves as the player's health. Decreases in real-time (drains 3x faster during slow-motion aiming). Killing enemies rewards seconds, while taking damage or using active mutations penalizes seconds.</li>
+            <li><strong>Level Survival Time:</strong> Count-down timer for each floor. To complete a floor, the player must survive the timer AND defeat all spawned enemies.</li>
+            <li><strong>Combo Counter:</strong> Tracks the number of enemies killed within a single dash or short window to reward significant life time bonuses and high combo alerts.</li>
+        </ul>
+
+        <h2>Document Navigation</h2>
+        <p>Read the dedicated pages to understand specific subsystems:</p>
+        <ul>
+            <li><strong><a href="architecture.html">Architecture & Managers</a>:</strong> Global managers (GameManager, ComboManager, ScoreManager), Event Bus, and Object Pooling.</li>
+            <li><strong><a href="player.html">Player & State Machine</a>:</strong> Input handling, State Machine structure, physics force calculations, and trajectory math.</li>
+            <li><strong><a href="enemies.html">Enemies & Combat AI</a>:</strong> Kinds of movement AI, health scaling, and special shields, explosions, mitosis slimes, and slow zones.</li>
+            <li><strong><a href="upgrades.html">Upgrade Cards (Roguelike)</a>:</strong> Card database, strategy patterns for upgrades, active mutations (Double Dash, Fire Trails, Vacuum blades), passives, and corrupted cards.</li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade Cards & Roguelike - Ricochet Ronin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>RICOCHET RONIN</h2>
+        <div class="sidebar-subtitle">Codebase Guide</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Overview & Concept</a></li>
+            <li><a href="architecture.html">Architecture & Managers</a></li>
+            <li><a href="player.html">Player & State Machine</a></li>
+            <li><a href="enemies.html">Enemies & Combat AI</a></li>
+            <li><a href="upgrades.html" class="active">Upgrade Cards (Roguelike)</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Roguelike <span class="highlight">Upgrade Cards</span></h1>
+        <p>At the end of each floor, the game pauses action (sets <code>Time.timeScale = 0f</code>) and prompts the player to select one of three random upgrade cards. The upgrade cards system is built using the <strong>Strategy Pattern</strong>, allowing modular behaviors to modify game mechanics dynamically.</p>
+
+        <h2>Upgrade Card Architecture</h2>
+        <p>The base class is a ScriptableObject called <code>UpgradeCardSO</code> (found in <code>Assets/_Scripts/ScriptableObjects/UpgradeCardSO.cs</code>). It exposes the abstract method:</p>
+        <pre><code>public abstract void ApplyUpgrade(Player player);</code></pre>
+        <p>Thẻ nâng cấp được phân loại thành ba nhóm (<code>CardType</code>) định hình đường viền thẻ trong UI và mức độ ảnh hưởng của chúng:</p>
+
+        <div class="grid">
+            <!-- Mutations -->
+            <div class="card yellow">
+                <h3>Mutations <span class="badge mutation">Mutation</span></h3>
+                <p>Card border in UI: <strong>Gold/Yellow</strong>.</p>
+                <p>Active mutations change the player's core lướt behavior. To prevent game breaking combos, <strong>only 1 active Mutation can be held at a time</strong>. If a player already has an active mutation, mutations are filtered out of the selection pool.</p>
+            </div>
+
+            <!-- Passives -->
+            <div class="card cyan">
+                <h3>Passives <span class="badge passive">Passive</span></h3>
+                <p>Card border in UI: <strong>Cyan</strong>.</p>
+                <p>Simple passive stat bonuses affecting weapon metrics (power, maximum distance, time scales, or combo rewards). Can be stacked infinitely.</p>
+            </div>
+
+            <!-- Corrupteds -->
+            <div class="card crimson">
+                <h3>Corrupteds <span class="badge corrupted">Corrupted</span></h3>
+                <p>Card border in UI: <strong>Crimson Red</strong>.</p>
+                <p>Double-edged sword perks. They provide extremely powerful combat modifiers, but introduce harsh penalties to survivability or action speed.</p>
+            </div>
+        </div>
+
+        <h2>Upgrade Card Catalog</h2>
+        <p>Here is the full database of cards currently implemented in the codebase:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Card Name</th>
+                    <th>Category</th>
+                    <th>Mechanic & Implementation Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Double Dash -->
+                <tr>
+                    <td><strong>Double Dash</strong></td>
+                    <td><span class="badge mutation">Mutation</span></td>
+                    <td>
+                        Enables mid-dash redirection.<br>
+                        <ul>
+                            <li>Sets <code>player.HasDoubleDash = true</code>.</li>
+                            <li>If true, players can left-click while in <code>PlayerDashingState</code> to trigger redirection.</li>
+                            <li>Redirection consumes <strong>5 seconds</strong> of player life time and returns the player to <code>PlayerAimingState</code>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Vacuum Blade -->
+                <tr>
+                    <td><strong>Vacuum Blade</strong></td>
+                    <td><span class="badge mutation">Mutation</span></td>
+                    <td>
+                        Pulls nearby enemies toward the player's path during a dash.<br>
+                        <ul>
+                            <li>Sets <code>player.HasVacuumBlade = true</code>.</li>
+                            <li>During <code>PlayerDashingState.FixedUpdate()</code>, it performs <code>Physics2D.OverlapCircleAll</code> with a radius of <strong>3.0 units</strong>.</li>
+                            <li>Pulls all overlaps tagged <code>"Enemy"</code> towards the player position at a speed of <strong>8.0 units/sec</strong>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Trail of Fire -->
+                <tr>
+                    <td><strong>Trail of Fire</strong></td>
+                    <td><span class="badge mutation">Mutation</span></td>
+                    <td>
+                        Leaves a path of flames behind the player during a dash.<br>
+                        <ul>
+                            <li>Sets <code>player.HasTrailOfFire = true</code>.</li>
+                            <li>Periodically (every <strong>0.08s</strong>) spawns a <code>FireTrailSegment</code> collider behind the player.</li>
+                            <li>The fire segment has a trigger collider (radius <code>0.3f</code>), deals <strong>1 damage</strong> to enemies touching it, and destroys itself after <strong>2.0 seconds</strong>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Time Harvester -->
+                <tr>
+                    <td><strong>Time Harvester</strong></td>
+                    <td><span class="badge passive">Passive</span></td>
+                    <td>
+                        Tiers up bounce-kill rewards.<br>
+                        <ul>
+                            <li>Increments <code>GameManager.Instance.TimeHarvesterBonusPercent</code> by <strong>+25%</strong> (0.25f).</li>
+                            <li>When the player kills an enemy while <code>player.CurrentDashBounces &gt; 0</code>, the enemy's <code>timeBonusOnKill</code> is scaled up by this multiplier.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Adrenaline Rush -->
+                <tr>
+                    <td><strong>Adrenaline Rush</strong></td>
+                    <td><span class="badge passive">Passive</span></td>
+                    <td>
+                        Gives more time to calculate trajectory paths.<br>
+                        <ul>
+                            <li>Multiplies <code>player.AimingTimeScaleModifier</code> by <strong>0.8x</strong>.</li>
+                            <li>Enters a deeper slow-motion state during aiming (reduces timeScale below the default 0.1f, down to 0.08f, etc.).</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Kinetic Momentum -->
+                <tr>
+                    <td><strong>Kinetic Momentum</strong></td>
+                    <td><span class="badge passive">Passive</span></td>
+                    <td>
+                        Increases collision damage based on physics reflections.<br>
+                        <ul>
+                            <li>Increments <code>GameManager.Instance.KineticMomentumBonusDamage</code> by <strong>+1</strong>.</li>
+                            <li>When hitting enemies in the dashing state, damage dealt is calculated as: <code>baseDamage + (bounces * KineticMomentumBonusDamage)</code>. Bounces reset when the dash completes.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Glass Blade -->
+                <tr>
+                    <td><strong>Glass Blade</strong></td>
+                    <td><span class="badge corrupted">Corrupted</span></td>
+                    <td>
+                        Massive offense upgrade with high fragility.<br>
+                        <ul>
+                            <li>Sets <code>GameManager.Instance.IsGlassBladeActive = true</code>.</li>
+                            <li>Triggers <code>player.UpgradeWeaponPower(0.50f)</code> (+50% launch speed).</li>
+                            <li>Base hit damage is increased from 1 to <strong>3 damage</strong>.</li>
+                            <li>Vulnerability penalty (getting hit by enemies when not in a dash) increases from 10s to <strong>25 seconds</strong>.</li>
+                        </ul>
+                    </td>
+                </tr>
+                <!-- Satanic Hourglass -->
+                <tr>
+                    <td><strong>Satanic Hourglass</strong></td>
+                    <td><span class="badge corrupted">Corrupted</span></td>
+                    <td>
+                        High idle depletion in exchange for freezing enemies on kill.<br>
+                        <ul>
+                            <li>Sets <code>GameManager.Instance.IsSatanicHourglassActive = true</code>.</li>
+                            <li>When active, the player's resting life time drain rate is doubled (2s/sec depletion instead of 1s/sec).</li>
+                            <li>However, killing an enemy calls <code>GameManager.Instance.FreezeAllEnemies(1.0f)</code>, freezing all other active enemies for <strong>1 second</strong>.</li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
