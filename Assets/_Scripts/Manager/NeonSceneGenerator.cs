@@ -129,14 +129,32 @@ public class NeonSceneGenerator : MonoBehaviour
         int wallLayerId = LayerMask.NameToLayer("Wall");
         if (wallLayerId == -1) wallLayerId = 6; // Default fallback to Wall layer
 
-        // Configure Wall segments: Top, Bottom, Left, Right
-        ConfigureWall(wallsParent.transform, "Top", new Vector3(0, orthographicSize + wallThickness / 2f, 0), new Vector3(width + wallThickness * 2f, wallThickness, 1), physMat, wallLayerId);
-        ConfigureWall(wallsParent.transform, "Bottom", new Vector3(0, -(orthographicSize + wallThickness / 2f), 0), new Vector3(width + wallThickness * 2f, wallThickness, 1), physMat, wallLayerId);
-        ConfigureWall(wallsParent.transform, "Left", new Vector3(-(width / 2f + wallThickness / 2f), 0, 0), new Vector3(wallThickness, height, 1), physMat, wallLayerId);
-        ConfigureWall(wallsParent.transform, "Right", new Vector3(width / 2f + wallThickness / 2f, 0, 0), new Vector3(wallThickness, height, 1), physMat, wallLayerId);
+        float visualThickness = 0.15f;
+        float colliderThickness = 50.0f;
+        float overlap = 0.3f; // Small overlap to ensure visual corners look perfect
+
+        // For Right Wall:
+        Vector2 rightColliderSize = new Vector2(colliderThickness, height + overlap * 2f);
+        Vector2 rightColliderOffset = new Vector2(colliderThickness / 2f - visualThickness / 2f, 0f);
+        ConfigureWall(wallsParent.transform, "Right", new Vector3(width / 2f, 0, 0), new Vector3(visualThickness, height + overlap * 2f, 1), physMat, wallLayerId, rightColliderSize, rightColliderOffset);
+
+        // For Left Wall:
+        Vector2 leftColliderSize = new Vector2(colliderThickness, height + overlap * 2f);
+        Vector2 leftColliderOffset = new Vector2(visualThickness / 2f - colliderThickness / 2f, 0f);
+        ConfigureWall(wallsParent.transform, "Left", new Vector3(-width / 2f, 0, 0), new Vector3(visualThickness, height + overlap * 2f, 1), physMat, wallLayerId, leftColliderSize, leftColliderOffset);
+
+        // For Top Wall:
+        Vector2 topColliderSize = new Vector2(width + overlap * 2f, colliderThickness);
+        Vector2 topColliderOffset = new Vector2(0f, colliderThickness / 2f - visualThickness / 2f);
+        ConfigureWall(wallsParent.transform, "Top", new Vector3(0, orthographicSize, 0), new Vector3(width + overlap * 2f, visualThickness, 1), physMat, wallLayerId, topColliderSize, topColliderOffset);
+
+        // For Bottom Wall:
+        Vector2 bottomColliderSize = new Vector2(width + overlap * 2f, colliderThickness);
+        Vector2 bottomColliderOffset = new Vector2(0f, visualThickness / 2f - colliderThickness / 2f);
+        ConfigureWall(wallsParent.transform, "Bottom", new Vector3(0, -orthographicSize, 0), new Vector3(width + overlap * 2f, visualThickness, 1), physMat, wallLayerId, bottomColliderSize, bottomColliderOffset);
     }
 
-    private void ConfigureWall(Transform parent, string wallName, Vector3 position, Vector3 scale, PhysicsMaterial2D physMat, int layer)
+    private void ConfigureWall(Transform parent, string wallName, Vector3 position, Vector3 scale, PhysicsMaterial2D physMat, int layer, Vector2 colliderSize, Vector2 colliderOffset)
     {
         Transform wallTrans = parent.Find(wallName);
         GameObject wallGo;
@@ -158,7 +176,8 @@ public class NeonSceneGenerator : MonoBehaviour
         BoxCollider2D collider = wallGo.GetComponent<BoxCollider2D>();
         if (collider == null) collider = wallGo.AddComponent<BoxCollider2D>();
         collider.sharedMaterial = physMat;
-        collider.size = Vector2.one;
+        collider.size = colliderSize;
+        collider.offset = colliderOffset;
 
         // Setup SpriteRenderer for high glow minimalist neon border styling
         SpriteRenderer sr = wallGo.GetComponent<SpriteRenderer>();
