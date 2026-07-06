@@ -132,9 +132,10 @@
         </ul>
 
         <h2>Juice & Aesthetics Setup</h2>
-        <p><strong>Files:</strong> <code>CameraJuice.cs</code> & <code>NeonSceneGenerator.cs</code></p>
+        <p><strong>Files:</strong> <code>CameraJuice.cs</code>, <code>NeonSceneGenerator.cs</code>, & <code>OrthographicArenaConfiner.cs</code></p>
         <ul>
             <li><code>CameraJuice</code>: Attached to the Main Camera. Uses DOTween to trigger a clean 2D screen shake on high combo kills (Triple Kill and above). Exposes <code>TriggerScreenShake(duration, strength)</code>.</li>
+            <li><code>OrthographicArenaConfiner</code>: Attached to the Main Camera. Procedurally spawns 4 static indestructible boundary walls (10 units thick, extending outwards) matching the Main Camera's aspect ratio. Automatically forces Player collision detection to Continuous, and spawns neon cyan sparks/screen shake when the player collides with a wall. Resizes dynamically if the screen aspect ratio changes.</li>
             <li><code>NeonSceneGenerator</code>: A procedural setup tool for generating the "Neon Noir Minimalist Arcade" arena.
                 <ul>
                     <li>Creates boundaries matching the camera aspect ratio with zero-friction, fully bouncy colliders.</li>
