@@ -12,7 +12,7 @@ public class OrthographicArenaConfiner : MonoBehaviour
     public event Action<Vector2, Vector2> OnWallHit;
 
     [Header("Physics Configuration")]
-    [Tooltip("Thickness of the boundaries extending OUTWARDS from the viewport edges.")]
+    [Tooltip("Thickness of the boundaries extending OUTWARDS from the viewport edges (5-10 recommended).")]
     [SerializeField] private float wallThickness = 10f;
     [SerializeField] private PhysicsMaterial2D customPhysicsMaterial;
 
