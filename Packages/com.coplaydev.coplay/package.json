@@ -1,0 +1,24 @@
+{
+  "name": "com.coplaydev.coplay",
+  "displayName": "Coplay",
+  "version": "8.20.1",
+  "unity": "2022.3",
+  "description": "AI copilot/assistant for game development.\n\nJoin our Discord: https://discord.gg/y4p8KfzrN4 \n\nWebsite: https://www.coplay.dev/ \n\nDocs: https://docs.coplay.dev/getting-started",
+  "documentationUrl": "https://docs.coplay.dev/getting-started",
+  "dependencies": {
+    "com.unity.inputsystem": "1.1.1",
+    "com.unity.cloud.gltfast": "6.12.1"
+  },
+  "keywords": [
+    "coplay",
+    "unity",
+    "copilot",
+    "ai"
+  ],
+  "author": {
+    "name": "Coplay",
+    "email": "support@coplay.dev",
+    "url": "https://www.coplay.dev/"
+  },
+  "_fingerprint": "377ff5d3e14e1a095c30be8ef8e1d4c57dd0e322"
+}
