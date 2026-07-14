@@ -125,10 +125,13 @@ public class UIDiegeticTimer : MonoBehaviour
         if (pulseTween != null && pulseTween.IsActive()) pulseTween.Kill();
         if (flashTween != null && flashTween.IsActive()) flashTween.Kill();
 
-        radialImage.transform.localScale = Vector3.one;
-        Color col = radialImage.color;
-        col.a = 1f;
-        radialImage.color = col;
+        if (radialImage != null)
+        {
+            radialImage.transform.localScale = Vector3.one;
+            Color col = radialImage.color;
+            col.a = 1f;
+            radialImage.color = col;
+        }
     }
 
     private void OnDestroy()

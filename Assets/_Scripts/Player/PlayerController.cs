@@ -47,7 +47,16 @@ public class Player : MonoBehaviour
         {
             playerInput = gameObject.AddComponent<PlayerInput>();
         }
-        moveAction = playerInput.actions["Player/Move"];
+        
+        // Check if the action exists before accessing it
+        if (playerInput != null && playerInput.actions != null)
+        {
+            moveAction = playerInput.actions["Player/Move"];
+        }
+        else
+        {
+            moveAction = null;
+        }
 
         // Initialize state machine & states
         StateMachine = new PlayerStateMachine();
@@ -95,10 +104,13 @@ public class Player : MonoBehaviour
             Vector2 moveInput = moveAction.ReadValue<Vector2>();
             
             // Only move if not in aiming state (can move while aiming for positioning)
-            if (StateMachine.CurrentState is not PlayerAimingState)
+            if (StateMachine != null && StateMachine.CurrentState is not PlayerAimingState)
             {
                 // Apply movement in all four directions (left, right, up, down)
-                rb.linearVelocity = new Vector2(moveInput.x * 5f, moveInput.y * 5f);
+                if (rb != null)
+                {
+                    rb.linearVelocity = new Vector2(moveInput.x * 5f, moveInput.y * 5f);
+                }
             }
         }
     }
