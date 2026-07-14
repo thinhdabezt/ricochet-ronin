@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CameraShake : MonoBehaviour
 {
-    public static CameraShake Instance;
+    public static CameraShake Instance { get; private set; }
 
     private Vector3 originalPos;
     private Coroutine activeShakeCoroutine;

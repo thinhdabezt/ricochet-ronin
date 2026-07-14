@@ -219,25 +219,36 @@ public class OrthographicArenaConfiner : MonoBehaviour
     /// </summary>
     private void SpawnHitSparks(Vector2 position, Vector2 normal)
     {
+        // Clean up any existing particle systems to prevent "Setting the duration while system is still playing" error
+        ParticleSystem[] existingSparks = GameObject.FindObjectsOfType<ParticleSystem>();
+        foreach (ParticleSystem existingPs in existingSparks)
+        {
+            if (existingPs.gameObject.name == "WallHitSparks")
+            {
+                existingPs.Stop(true);
+                Destroy(existingPs.gameObject, 0.1f); // Give time for stop to complete
+            }
+        }
+
         GameObject sparksGo = new GameObject("WallHitSparks");
         sparksGo.transform.position = position;
 
-        ParticleSystem ps = sparksGo.AddComponent<ParticleSystem>();
+        ParticleSystem particleSystem = sparksGo.AddComponent<ParticleSystem>();
         
-        var main = ps.main;
+        var main = particleSystem.main;
+        main.duration = 0.4f;
+        main.loop = false;
+        main.stopAction = ParticleSystemStopAction.Destroy;
         main.startColor = sparksColor;
         main.startSize = new ParticleSystem.MinMaxCurve(0.04f, 0.12f);
         main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 6f);
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
-        main.duration = 0.4f;
-        main.loop = false;
-        main.stopAction = ParticleSystemStopAction.Destroy;
 
-        var emission = ps.emission;
+        var emission = particleSystem.emission;
         emission.rateOverTime = 0;
         emission.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, 15) });
 
-        var shape = ps.shape;
+        var shape = particleSystem.shape;
         shape.shapeType = ParticleSystemShapeType.Cone;
         shape.angle = 45f;
         shape.radius = 0.05f;
@@ -252,6 +263,6 @@ public class OrthographicArenaConfiner : MonoBehaviour
             psr.material = new Material(Shader.Find("Sprites/Default"));
         }
 
-        ps.Play();
+        particleSystem.Play();
     }
 }

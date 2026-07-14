@@ -19,6 +19,10 @@ public class Player : MonoBehaviour
     private Vector2 endPosition;
     private Camera mainCamera;
 
+    // Input System
+    private PlayerInput playerInput;
+    private InputAction moveAction;
+
     // State Machine
     public PlayerStateMachine StateMachine { get; private set; }
     public PlayerIdleState IdleState { get; private set; }
@@ -36,6 +40,14 @@ public class Player : MonoBehaviour
         mainCamera = Camera.main;
 
         lr.enabled = false;
+
+        // Initialize Input System
+        playerInput = GetComponent<PlayerInput>();
+        if (playerInput == null)
+        {
+            playerInput = gameObject.AddComponent<PlayerInput>();
+        }
+        moveAction = playerInput.actions["Player/Move"];
 
         // Initialize state machine & states
         StateMachine = new PlayerStateMachine();
@@ -63,6 +75,9 @@ public class Player : MonoBehaviour
             StateMachine.CurrentState.HandleInput();
             StateMachine.CurrentState.Update();
         }
+
+        // Handle continuous movement
+        HandleMovement();
     }
 
     private void FixedUpdate()
@@ -70,6 +85,21 @@ public class Player : MonoBehaviour
         if (StateMachine != null && StateMachine.CurrentState != null)
         {
             StateMachine.CurrentState.FixedUpdate();
+        }
+    }
+
+    private void HandleMovement()
+    {
+        if (moveAction != null)
+        {
+            Vector2 moveInput = moveAction.ReadValue<Vector2>();
+            
+            // Only move if not in aiming state (can move while aiming for positioning)
+            if (StateMachine.CurrentState is not PlayerAimingState)
+            {
+                // Apply movement in all four directions (left, right, up, down)
+                rb.linearVelocity = new Vector2(moveInput.x * 5f, moveInput.y * 5f);
+            }
         }
     }
     
