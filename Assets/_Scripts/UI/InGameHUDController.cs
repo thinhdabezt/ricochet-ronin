@@ -9,12 +9,14 @@ public class InGameHUDController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI scoreText;       // Displays Score
     [SerializeField] private TextMeshProUGUI comboText;       // Displays Combo
     [SerializeField] private TextMeshProUGUI objectiveText;   // Displays LevelSurvivalTime (Timer)
+    [SerializeField] private TextMeshProUGUI floorText;       // Displays Floor number
 
     [Header("UI Containers for Punch Scaling")]
     [SerializeField] private RectTransform timeContainer;
     [SerializeField] private RectTransform scoreContainer;
     [SerializeField] private RectTransform comboContainer;
     [SerializeField] private RectTransform objectiveContainer;
+    [SerializeField] private RectTransform floorContainer;
 
     [Header("HUD Settings")]
     [SerializeField] private string timePrefix = "TIME: ";
@@ -22,6 +24,7 @@ public class InGameHUDController : MonoBehaviour
     [SerializeField] private string comboPrefix = "COMBO: ";
     [SerializeField] private string objectivePrefix = "Survive: ";
     [SerializeField] private string objectiveSuffix = " seconds remaining";
+    [SerializeField] private string floorPrefix = "FLOOR: ";
 
     private int displayedScore = 0;
     private int currentScore = 0;
@@ -74,6 +77,22 @@ public class InGameHUDController : MonoBehaviour
         if (comboText == null) comboText = transform.Find("Combo")?.GetComponent<TextMeshProUGUI>();
         if (objectiveText == null) objectiveText = transform.Find("Timer")?.GetComponent<TextMeshProUGUI>();
 
+        // Find or create Floor UI at runtime if floorText is not assigned
+        if (floorText == null)
+        {
+            var floorGo = transform.Find("Floor")?.gameObject;
+            if (floorGo == null)
+            {
+                floorGo = new GameObject("Floor");
+                floorGo.transform.SetParent(transform, false);
+                floorText = floorGo.AddComponent<TextMeshProUGUI>();
+            }
+            else
+            {
+                floorText = floorGo.GetComponent<TextMeshProUGUI>();
+            }
+        }
+
         // Always enforce QuinqueFive pixel font and correct sizes/alignments at runtime
         TMP_FontAsset pixelFont = null;
         if (scoreText != null && scoreText.font != null && scoreText.font.name.Contains("Quinque")) pixelFont = scoreText.font;
@@ -86,6 +105,7 @@ public class InGameHUDController : MonoBehaviour
             if (scoreText != null) scoreText.font = pixelFont;
             if (comboText != null) comboText.font = pixelFont;
             if (objectiveText != null) objectiveText.font = pixelFont;
+            if (floorText != null) floorText.font = pixelFont;
         }
 
         if (timeText != null)
@@ -102,6 +122,11 @@ public class InGameHUDController : MonoBehaviour
         {
             comboText.fontSize = 18;
             comboText.alignment = TextAlignmentOptions.Right;
+        }
+        if (floorText != null)
+        {
+            floorText.fontSize = 18;
+            floorText.alignment = TextAlignmentOptions.Right;
         }
         if (objectiveText != null)
         {
@@ -145,6 +170,13 @@ public class InGameHUDController : MonoBehaviour
             {
                 timeText.color = new Color(1f, 0f, 0.33f); // Neon Crimson
             }
+        }
+        
+        // Update Floor display in real-time
+        if (GameManager.Instance != null && floorText != null)
+        {
+            floorText.text = $"{floorPrefix}{GameManager.Instance.CurrentFloor}";
+            floorText.color = new Color(0.2f, 0.9f, 0.5f); // Neon Green
         }
     }
 
@@ -223,6 +255,24 @@ public class InGameHUDController : MonoBehaviour
             rect.pivot = new Vector2(0.5f, 1f);
             rect.sizeDelta = defaultSizeDelta;
             rect.anchoredPosition = new Vector2(0f, -40f);
+        }
+ 
+        // Top-Right corner: FLOOR (at y: -95) - Symmetrical to SCORE
+        if (floorContainer != null)
+        {
+            floorContainer.anchorMin = new Vector2(1f, 1f);
+            floorContainer.anchorMax = new Vector2(1f, 1f);
+            floorContainer.pivot = new Vector2(1f, 1f);
+            floorContainer.anchoredPosition = new Vector2(-40f, -95f);
+        }
+        else if (floorText != null)
+        {
+            var rect = floorText.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(1f, 1f);
+            rect.sizeDelta = defaultSizeDelta;
+            rect.anchoredPosition = new Vector2(-40f, -95f);
         }
     }
 
