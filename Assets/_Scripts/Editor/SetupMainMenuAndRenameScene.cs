@@ -84,7 +84,7 @@ public class SetupMainMenuAndRenameScene : EditorWindow
 
         GameObject eventSystemGo = new GameObject("EventSystem");
         eventSystemGo.AddComponent<EventSystem>();
-        eventSystemGo.AddComponent<StandaloneInputModule>();
+        eventSystemGo.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
 
         // Background Panel
         GameObject panelGo = new GameObject("BackgroundPanel");
