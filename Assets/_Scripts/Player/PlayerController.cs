@@ -103,8 +103,8 @@ public class Player : MonoBehaviour
         {
             Vector2 moveInput = moveAction.ReadValue<Vector2>();
             
-            // Only move if not in aiming state (can move while aiming for positioning)
-            if (StateMachine != null && StateMachine.CurrentState is not PlayerAimingState)
+            // Only move if not in dashing state (keyboard input must not override active dash physics)
+            if (StateMachine != null && StateMachine.CurrentState is not PlayerDashingState)
             {
                 // Apply movement in all four directions (left, right, up, down)
                 if (rb != null)
