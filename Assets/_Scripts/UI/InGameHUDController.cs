@@ -74,20 +74,39 @@ public class InGameHUDController : MonoBehaviour
         if (comboText == null) comboText = transform.Find("Combo")?.GetComponent<TextMeshProUGUI>();
         if (objectiveText == null) objectiveText = transform.Find("Timer")?.GetComponent<TextMeshProUGUI>();
 
-        // Find font asset from Combo (or other TMPro components) to apply to Wave
-        if (timeText != null && timeText.font == null)
-        {
-            TMP_FontAsset pixelFont = null;
-            if (comboText != null) pixelFont = comboText.font;
-            else if (scoreText != null) pixelFont = scoreText.font;
-            else if (objectiveText != null) pixelFont = objectiveText.font;
+        // Always enforce QuinqueFive pixel font and correct sizes/alignments at runtime
+        TMP_FontAsset pixelFont = null;
+        if (scoreText != null && scoreText.font != null && scoreText.font.name.Contains("Quinque")) pixelFont = scoreText.font;
+        else if (comboText != null && comboText.font != null && comboText.font.name.Contains("Quinque")) pixelFont = comboText.font;
+        else if (objectiveText != null && objectiveText.font != null && objectiveText.font.name.Contains("Quinque")) pixelFont = objectiveText.font;
 
-            if (pixelFont != null)
-            {
-                timeText.font = pixelFont;
-                timeText.fontSize = 18;
-                timeText.alignment = TextAlignmentOptions.Left;
-            }
+        if (pixelFont != null)
+        {
+            if (timeText != null) timeText.font = pixelFont;
+            if (scoreText != null) scoreText.font = pixelFont;
+            if (comboText != null) comboText.font = pixelFont;
+            if (objectiveText != null) objectiveText.font = pixelFont;
+        }
+
+        if (timeText != null)
+        {
+            timeText.fontSize = 18;
+            timeText.alignment = TextAlignmentOptions.Left;
+        }
+        if (scoreText != null)
+        {
+            scoreText.fontSize = 18;
+            scoreText.alignment = TextAlignmentOptions.Left;
+        }
+        if (comboText != null)
+        {
+            comboText.fontSize = 18;
+            comboText.alignment = TextAlignmentOptions.Right;
+        }
+        if (objectiveText != null)
+        {
+            objectiveText.fontSize = 18;
+            objectiveText.alignment = TextAlignmentOptions.Center;
         }
 
         ConfigureLayouts();
@@ -132,7 +151,8 @@ public class InGameHUDController : MonoBehaviour
     private void ConfigureLayouts()
     {
         // Programmatically enforce matching positions to look unified and clean:
-        Vector2 defaultSizeDelta = new Vector2(400f, 50f);
+        // Increased width from 400f to 800f to prevent text wrapping on long messages
+        Vector2 defaultSizeDelta = new Vector2(800f, 50f);
 
         // Top-Left corner: TIME (at y: -40), SCORE (at y: -95)
         if (timeContainer != null)

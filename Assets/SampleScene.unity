@@ -8520,19 +8520,6 @@ MonoBehaviour:
   m_Script: {fileID: 1619890673}
   m_Name: 
   m_EditorClassIdentifier: DynamicScript_8189eb8230394bf085d2d2e8163d155a::NeonSceneGenerator
-  visualWallThickness: 0.2
-  physicsWallThickness: 20
-  wallLayer:
-    m_Bits: 0
-  customPhysicsMaterial: {fileID: 0}
-  gridSpacing: 2
-  gridOpacity: 0.08
-  gridColor:
-    r: 0
-    g: 0.5
-    b: 1
-    a: 1
-  targetCamera: {fileID: 519420031}
 --- !u!4 &1762876481
 Transform:
   m_ObjectHideFlags: 0
@@ -9628,15 +9615,6 @@ MonoBehaviour:
   m_Script: {fileID: 389589280}
   m_Name: 
   m_EditorClassIdentifier: DynamicScript_e2424c778f464a7c8d3a49e1b81dee68::NeonSceneGenerator
-  wallThickness: 1
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  customPhysicsMaterial: {fileID: 0}
-  gridSpacing: 2
-  gridOpacity: 0.08
-  gridColor: {r: 0, g: 0.5, b: 1, a: 1}
-  targetCamera: {fileID: 519420031}
 --- !u!4 &1975745743
 Transform:
   m_ObjectHideFlags: 0

@@ -44,21 +44,21 @@ public class ResetCameraAndHUD : EditorWindow
             var waveGo = uiGo.transform.Find("Wave")?.gameObject;
             if (waveGo != null) ConfigureText(waveGo, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -40), TextAlignmentOptions.Left, 18);
 
-            // Combo (COMBO)
-            var comboGo = uiGo.transform.Find("Combo")?.gameObject;
-            if (comboGo != null) ConfigureText(comboGo, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -95), TextAlignmentOptions.Left, 18);
+            // Score (SCORE)
+            var scoreGo = uiGo.transform.Find("Score")?.gameObject;
+            if (scoreGo != null) ConfigureText(scoreGo, pixelFont, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(40, -95), TextAlignmentOptions.Left, 18);
 
             // Timer (TIMER)
             var timerGo = uiGo.transform.Find("Timer")?.gameObject;
             if (timerGo != null) ConfigureText(timerGo, pixelFont, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -40), TextAlignmentOptions.Center, 18);
 
-            // Dashes (SURVIVE)
-            var dashesGo = uiGo.transform.Find("Dashes")?.gameObject;
-            if (dashesGo != null) ConfigureText(dashesGo, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -40), TextAlignmentOptions.Right, 18);
+            // Combo (COMBO)
+            var comboGo = uiGo.transform.Find("Combo")?.gameObject;
+            if (comboGo != null) ConfigureText(comboGo, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -40), TextAlignmentOptions.Right, 18);
 
-            // Score (SCORE)
-            var scoreGo = uiGo.transform.Find("Score")?.gameObject;
-            if (scoreGo != null) ConfigureText(scoreGo, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -95), TextAlignmentOptions.Right, 18);
+            // Dashes (SURVIVE / unused)
+            var dashesGo = uiGo.transform.Find("Dashes")?.gameObject;
+            if (dashesGo != null) ConfigureText(dashesGo, pixelFont, new Vector2(1, 1), new Vector2(1, 1), new Vector2(1, 1), new Vector2(-40, -95), TextAlignmentOptions.Right, 18);
 
             Debug.Log("Rearranged HUD Elements successfully.");
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
@@ -80,7 +80,7 @@ public class ResetCameraAndHUD : EditorWindow
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
             rect.pivot = pivot;
-            rect.sizeDelta = new Vector2(400, 50);
+            rect.sizeDelta = new Vector2(800, 50);
             rect.anchoredPosition = anchoredPos;
         }
 
