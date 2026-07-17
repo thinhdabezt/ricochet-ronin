@@ -169,6 +169,7 @@ public class NeonSceneGenerator : MonoBehaviour
         }
 
         wallGo.transform.localPosition = position;
+        wallGo.transform.localRotation = Quaternion.identity;
         wallGo.transform.localScale = scale;
         wallGo.layer = layer;
 
