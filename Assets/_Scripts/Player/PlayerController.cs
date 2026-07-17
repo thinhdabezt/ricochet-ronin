@@ -19,9 +19,7 @@ public class Player : MonoBehaviour
     private Vector2 endPosition;
     private Camera mainCamera;
 
-    // Input System
-    private PlayerInput playerInput;
-    private InputAction moveAction;
+
 
     // State Machine
     public PlayerStateMachine StateMachine { get; private set; }
@@ -41,22 +39,7 @@ public class Player : MonoBehaviour
 
         lr.enabled = false;
 
-        // Initialize Input System
-        playerInput = GetComponent<PlayerInput>();
-        if (playerInput == null)
-        {
-            playerInput = gameObject.AddComponent<PlayerInput>();
-        }
-        
-        // Check if the action exists before accessing it
-        if (playerInput != null && playerInput.actions != null)
-        {
-            moveAction = playerInput.actions["Player/Move"];
-        }
-        else
-        {
-            moveAction = null;
-        }
+
 
         // Initialize state machine & states
         StateMachine = new PlayerStateMachine();
@@ -85,8 +68,7 @@ public class Player : MonoBehaviour
             StateMachine.CurrentState.Update();
         }
 
-        // Handle continuous movement
-        HandleMovement();
+
     }
 
     private void FixedUpdate()
@@ -97,23 +79,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void HandleMovement()
-    {
-        if (moveAction != null)
-        {
-            Vector2 moveInput = moveAction.ReadValue<Vector2>();
-            
-            // Only move if not in dashing state (keyboard input must not override active dash physics)
-            if (StateMachine != null && StateMachine.CurrentState is not PlayerDashingState)
-            {
-                // Apply movement in all four directions (left, right, up, down)
-                if (rb != null)
-                {
-                    rb.linearVelocity = new Vector2(moveInput.x * 5f, moveInput.y * 5f);
-                }
-            }
-        }
-    }
+
     
     public float AimingDrainRateModifier { get; set; } = 1.0f;
     public float AimingTimeScaleModifier { get; set; } = 1.0f;

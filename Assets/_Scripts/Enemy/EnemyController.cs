@@ -540,6 +540,7 @@ public class EnemyController : MonoBehaviour
         sparksGo.transform.position = position;
 
         ParticleSystem ps = sparksGo.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         
         var main = ps.main;
         main.startColor = new Color(1.0f, 0.85f, 0.2f, 1.0f);

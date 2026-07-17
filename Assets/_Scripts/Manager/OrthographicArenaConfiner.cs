@@ -234,6 +234,7 @@ public class OrthographicArenaConfiner : MonoBehaviour
         sparksGo.transform.position = position;
 
         ParticleSystem particleSystem = sparksGo.AddComponent<ParticleSystem>();
+        particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         
         var main = particleSystem.main;
         main.duration = 0.4f;
