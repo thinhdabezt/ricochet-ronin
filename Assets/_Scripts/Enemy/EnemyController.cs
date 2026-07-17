@@ -89,41 +89,30 @@ public class EnemyController : MonoBehaviour
 
         HandleMovement();
         HandleSpecialCooldowns();
+        HandleDamageOverTime();
     }
 
     private void HandleMovement()
     {
+        Vector3 desiredVelocity = Vector3.zero;
+
+        // 1. Calculate Base Behavior Velocity
         switch (enemyData.movementType)
         {
             case EnemyMovementType.Patrol:
                 if (enemyData.enemyName == "Ninja")
                 {
-                    // Random 2D wander within a 4-unit radius of initialPos
                     if (!hasNinjaTarget)
                     {
                         float randomAngle = Random.Range(0f, Mathf.PI * 2f);
                         float randomDist = Random.Range(1.0f, 4.0f);
                         Vector3 offset = new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f) * randomDist;
                         ninjaTargetPos = initialPos + offset;
-
-                        // Clamp to play area bounds (X: [-11, 11], Y: [-5, 5])
                         ninjaTargetPos.x = Mathf.Clamp(ninjaTargetPos.x, -11f, 11f);
                         ninjaTargetPos.y = Mathf.Clamp(ninjaTargetPos.y, -5f, 5f);
-
                         hasNinjaTarget = true;
                     }
-
-                    Vector3 nextPos = Vector3.MoveTowards(transform.position, ninjaTargetPos, enemyData.moveSpeed * Time.deltaTime);
-                    if (!IsPathBlockedByWall(nextPos))
-                    {
-                        transform.position = nextPos;
-                    }
-                    else
-                    {
-                        // Pick a new target next frame if blocked by a wall
-                        hasNinjaTarget = false;
-                    }
-
+                    desiredVelocity = (ninjaTargetPos - transform.position).normalized * enemyData.moveSpeed;
                     if (Vector3.Distance(transform.position, ninjaTargetPos) < 0.2f)
                     {
                         hasNinjaTarget = false;
@@ -132,30 +121,17 @@ public class EnemyController : MonoBehaviour
                 else
                 {
                     // Standard horizontal patrol
-                    Vector3 nextPos = transform.position;
-                    if (patrollingRight)
+                    desiredVelocity = (patrollingRight ? Vector3.right : Vector3.left) * enemyData.moveSpeed;
+                    
+                    // Predict if next patrol step hits wall or boundary range
+                    Vector3 nextPatrolPos = transform.position + desiredVelocity * Time.deltaTime;
+                    if (patrollingRight && (nextPatrolPos.x >= initialPos.x + patrolRange || IsPathBlockedByWall(nextPatrolPos)))
                     {
-                        nextPos += Vector3.right * enemyData.moveSpeed * Time.deltaTime;
-                        if (nextPos.x >= initialPos.x + patrolRange || IsPathBlockedByWall(nextPos))
-                        {
-                            patrollingRight = false;
-                        }
-                        else
-                        {
-                            transform.position = nextPos;
-                        }
+                        patrollingRight = false;
                     }
-                    else
+                    else if (!patrollingRight && (nextPatrolPos.x <= initialPos.x - patrolRange || IsPathBlockedByWall(nextPatrolPos)))
                     {
-                        nextPos += Vector3.left * enemyData.moveSpeed * Time.deltaTime;
-                        if (nextPos.x <= initialPos.x - patrolRange || IsPathBlockedByWall(nextPos))
-                        {
-                            patrollingRight = true;
-                        }
-                        else
-                        {
-                            transform.position = nextPos;
-                        }
+                        patrollingRight = true;
                     }
                 }
                 break;
@@ -167,36 +143,147 @@ public class EnemyController : MonoBehaviour
                     actionTimer = 0f;
                     BlinkTeleport();
                 }
+                desiredVelocity = Vector3.zero;
                 break;
 
             case EnemyMovementType.ChasePlayer:
                 if (playerTransform != null)
                 {
-                    Vector3 targetPos = Vector3.MoveTowards(transform.position, playerTransform.position, enemyData.moveSpeed * Time.deltaTime);
-                    if (!IsPathBlockedByWall(targetPos))
-                    {
-                        transform.position = targetPos;
-                    }
-                    else
-                    {
-                        // Try sliding X only
-                        Vector3 targetPosX = transform.position + new Vector3(targetPos.x - transform.position.x, 0f, 0f);
-                        if (!IsPathBlockedByWall(targetPosX))
-                        {
-                            transform.position = targetPosX;
-                        }
-                        else
-                        {
-                            // Try sliding Y only
-                            Vector3 targetPosY = transform.position + new Vector3(0f, targetPos.y - transform.position.y, 0f);
-                            if (!IsPathBlockedByWall(targetPosY))
-                            {
-                                transform.position = targetPosY;
-                            }
-                        }
-                    }
+                    desiredVelocity = (playerTransform.position - transform.position).normalized * enemyData.moveSpeed;
                 }
                 break;
+        }
+
+        // 2. Add Steering Forces (Chase or Flee depending on Player State)
+        bool playerDashing = false;
+        bool playerIdleOrAiming = false;
+        if (playerTransform != null)
+        {
+            var player = playerTransform.GetComponent<Player>();
+            if (player != null && player.StateMachine != null)
+            {
+                playerDashing = player.StateMachine.CurrentState is PlayerDashingState;
+                playerIdleOrAiming = player.StateMachine.CurrentState is PlayerIdleState || player.StateMachine.CurrentState is PlayerAimingState;
+            }
+        }
+
+        if (playerIdleOrAiming)
+        {
+            // Tend to approach player (attraction force)
+            desiredVelocity += (playerTransform.position - transform.position).normalized * enemyData.moveSpeed * 0.8f;
+        }
+        else if (playerDashing)
+        {
+            // Tend to flee from player (repulsion force)
+            desiredVelocity += (transform.position - playerTransform.position).normalized * enemyData.moveSpeed * 1.5f;
+        }
+
+        // 3. Add Separation Force (Avoid other enemies and player)
+        Vector3 separation = CalculateSeparationForce();
+        desiredVelocity += separation * enemyData.moveSpeed * 1.5f;
+
+        // 4. Clamp and Apply Velocity
+        float maxSpeed = playerDashing ? enemyData.moveSpeed * 1.5f : enemyData.moveSpeed;
+        Vector3 velocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed);
+
+        Vector3 targetPos = transform.position + velocity * Time.deltaTime;
+        if (!IsPathBlockedByWall(targetPos))
+        {
+            transform.position = targetPos;
+        }
+        else
+        {
+            // Slide along walls
+            Vector3 targetPosX = transform.position + new Vector3(velocity.x * Time.deltaTime, 0f, 0f);
+            if (!IsPathBlockedByWall(targetPosX))
+            {
+                transform.position = targetPosX;
+            }
+            else
+            {
+                Vector3 targetPosY = transform.position + new Vector3(0f, velocity.y * Time.deltaTime, 0f);
+                if (!IsPathBlockedByWall(targetPosY))
+                {
+                    transform.position = targetPosY;
+                }
+            }
+        }
+    }
+
+    private Vector3 CalculateSeparationForce()
+    {
+        Vector3 separation = Vector3.zero;
+        float neighborRadius = 0.8f; // distance to avoid other enemies
+        int count = 0;
+
+        // Avoid other enemies
+        var allEnemies = FindObjectsOfType<EnemyController>();
+        foreach (var other in allEnemies)
+        {
+            if (other != this && other != null && !other.isFusing)
+            {
+                float dist = Vector3.Distance(transform.position, other.transform.position);
+                if (dist < neighborRadius && dist > 0.01f)
+                {
+                    Vector3 diff = (transform.position - other.transform.position).normalized;
+                    separation += diff / dist; // stronger force when closer
+                    count++;
+                }
+            }
+        }
+
+        // Avoid player if player is not dashing (so we don't block the player but also don't overlap)
+        if (playerTransform != null)
+        {
+            bool playerDashing = false;
+            var player = playerTransform.GetComponent<Player>();
+            if (player != null && player.StateMachine != null)
+            {
+                playerDashing = player.StateMachine.CurrentState is PlayerDashingState;
+            }
+
+            if (!playerDashing)
+            {
+                float playerAvoidRadius = 0.9f;
+                float distToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+                if (distToPlayer < playerAvoidRadius && distToPlayer > 0.01f)
+                {
+                    Vector3 diff = (transform.position - playerTransform.position).normalized;
+                    separation += (diff / distToPlayer) * 2.0f; // extra strong push away from player
+                    count++;
+                }
+            }
+        }
+
+        if (count > 0)
+        {
+            separation /= count;
+        }
+
+        return separation;
+    }
+
+    private void HandleDamageOverTime()
+    {
+        if (playerTransform == null || GameManager.Instance == null) return;
+
+        var player = playerTransform.GetComponent<Player>();
+        if (player != null && player.StateMachine != null)
+        {
+            bool playerIdleOrAiming = player.StateMachine.CurrentState is PlayerIdleState || 
+                                     player.StateMachine.CurrentState is PlayerAimingState;
+
+            if (playerIdleOrAiming)
+            {
+                float dist = Vector3.Distance(transform.position, playerTransform.position);
+                float damageRadius = 1.0f; // Distance threshold for DoT
+                if (dist <= damageRadius)
+                {
+                    // Deal DoT: e.g. 5 seconds of player lifetime per second
+                    float dotDamage = 5f * Time.deltaTime;
+                    GameManager.Instance.PenalizePlayerTimeSilent(dotDamage);
+                }
+            }
         }
     }
 
@@ -317,7 +404,32 @@ public class EnemyController : MonoBehaviour
                     {
                         damage += player.CurrentDashBounces * GameManager.Instance.KineticMomentumBonusDamage;
                     }
+
+                    bool willKill = damage >= currentHealth;
+
                     TakeDamage(damage);
+
+                    if (!willKill)
+                    {
+                        Rigidbody2D playerRb = collision.GetComponent<Rigidbody2D>();
+                        Vector3 contactPoint = (collision.transform.position + transform.position) * 0.5f;
+                        Vector2 bounceDir = ((Vector2)collision.transform.position - (Vector2)transform.position).normalized;
+
+                        if (playerRb != null)
+                        {
+                            playerRb.linearVelocity = -playerRb.linearVelocity * 0.5f;
+                        }
+
+                        InstantiateSparkParticles(contactPoint, bounceDir);
+
+                        AudioClip clashClip = Resources.Load<AudioClip>("metal_clash");
+                        if (clashClip != null)
+                        {
+                            AudioSource.PlayClipAtPoint(clashClip, contactPoint);
+                        }
+
+                        CameraShake.Instance.ShakeCamera(3f, 0.1f);
+                    }
                 }
                 else
                 {

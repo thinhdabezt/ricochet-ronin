@@ -361,6 +361,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void PenalizePlayerTimeSilent(float amount)
+    {
+        if (IsGameOver || IsVictory) return;
+        PlayerLifeTime = Mathf.Max(0f, PlayerLifeTime - amount);
+        if (PlayerLifeTime <= 0f)
+        {
+            TriggerGameOver();
+        }
+    }
+
     private void SpawnTimeText(string value, Color color)
     {
         var playerGo = GameObject.FindWithTag("Player");
