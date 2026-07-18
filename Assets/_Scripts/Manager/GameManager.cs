@@ -106,6 +106,10 @@ public class GameManager : MonoBehaviour
             {
                 RestartGame();
             }
+            if (UnityEngine.InputSystem.Keyboard.current.mKey.wasPressedThisFrame)
+            {
+                ReturnToMainMenu();
+            }
             return;
         }
 
@@ -468,10 +472,6 @@ public class GameManager : MonoBehaviour
         var img = endGamePanel.AddComponent<Image>();
         img.color = new Color(0.02f, 0.02f, 0.05f, 0.92f); // Cinematic dark blue-black overlay
 
-        // Add Button component so clicking anywhere on the screen restarts the game
-        var btn = endGamePanel.AddComponent<Button>();
-        btn.onClick.AddListener(RestartGame);
-
         var cg = endGamePanel.AddComponent<CanvasGroup>();
         cg.alpha = 0f;
         cg.DOFade(1f, 0.4f).SetUpdate(true);
@@ -497,7 +497,7 @@ public class GameManager : MonoBehaviour
 
         var titleRect = titleGo.GetComponent<RectTransform>();
         titleRect.sizeDelta = new Vector2(1200, 150);
-        titleRect.anchoredPosition = new Vector2(0, 40);
+        titleRect.anchoredPosition = new Vector2(0, 100);
 
         // Slam down animation for the title
         titleGo.transform.localScale = new Vector3(3f, 3f, 3f);
@@ -519,7 +519,7 @@ public class GameManager : MonoBehaviour
 
         var subRect = subGo.GetComponent<RectTransform>();
         subRect.sizeDelta = new Vector2(1200, 100);
-        subRect.anchoredPosition = new Vector2(0, -60);
+        subRect.anchoredPosition = new Vector2(0, 15);
 
         // Subtle pulsing animation for subtitle after delay
         subText.alpha = 0f;
@@ -533,6 +533,68 @@ public class GameManager : MonoBehaviour
                     .SetUpdate(true);
             })
             .SetUpdate(true);
+
+        // Retry Button
+        var retryBtn = new GameObject("RetryButton");
+        retryBtn.transform.SetParent(endGamePanel.transform, false);
+        var rRect = retryBtn.AddComponent<RectTransform>();
+        rRect.sizeDelta = new Vector2(240, 50);
+        rRect.anchoredPosition = new Vector2(-140, -70);
+        var rImg = retryBtn.AddComponent<Image>();
+        rImg.color = new Color(0.07f, 0.07f, 0.1f, 0.9f);
+        var rBtn = retryBtn.AddComponent<Button>();
+        rBtn.targetGraphic = rImg;
+        ColorBlock rColors = rBtn.colors;
+        rColors.normalColor = new Color(0.07f, 0.07f, 0.1f, 0.9f);
+        rColors.highlightedColor = new Color(0f, 0.6f, 0.8f, 1f); // Neon Cyan
+        rColors.pressedColor = new Color(0f, 0.4f, 0.6f, 1f);
+        rColors.selectedColor = rColors.normalColor;
+        rBtn.colors = rColors;
+        rBtn.onClick.AddListener(RestartGame);
+
+        var rTextGo = new GameObject("Text");
+        rTextGo.transform.SetParent(retryBtn.transform, false);
+        var rText = rTextGo.AddComponent<TextMeshProUGUI>();
+        rText.text = "RETRY (R)";
+        rText.fontSize = 12;
+        rText.color = Color.white;
+        rText.alignment = TextAlignmentOptions.Center;
+        if (pixelFont != null) rText.font = pixelFont;
+        var rTextRect = rTextGo.GetComponent<RectTransform>();
+        rTextRect.anchorMin = Vector2.zero;
+        rTextRect.anchorMax = Vector2.one;
+        rTextRect.sizeDelta = Vector2.zero;
+
+        // Main Menu Button
+        var menuBtn = new GameObject("MenuButton");
+        menuBtn.transform.SetParent(endGamePanel.transform, false);
+        var mRect = menuBtn.AddComponent<RectTransform>();
+        mRect.sizeDelta = new Vector2(240, 50);
+        mRect.anchoredPosition = new Vector2(140, -70);
+        var mImg = menuBtn.AddComponent<Image>();
+        mImg.color = new Color(0.07f, 0.07f, 0.1f, 0.9f);
+        var mBtn = menuBtn.AddComponent<Button>();
+        mBtn.targetGraphic = mImg;
+        ColorBlock mColors = mBtn.colors;
+        mColors.normalColor = new Color(0.07f, 0.07f, 0.1f, 0.9f);
+        mColors.highlightedColor = new Color(0.5f, 0.2f, 0.6f, 1f); // Neon Purple
+        mColors.pressedColor = new Color(0.35f, 0.15f, 0.45f, 1f);
+        mColors.selectedColor = mColors.normalColor;
+        mBtn.colors = mColors;
+        mBtn.onClick.AddListener(ReturnToMainMenu);
+
+        var mTextGo = new GameObject("Text");
+        mTextGo.transform.SetParent(menuBtn.transform, false);
+        var mText = mTextGo.AddComponent<TextMeshProUGUI>();
+        mText.text = "MENU (M)";
+        mText.fontSize = 12;
+        mText.color = Color.white;
+        mText.alignment = TextAlignmentOptions.Center;
+        if (pixelFont != null) mText.font = pixelFont;
+        var mTextRect = mTextGo.GetComponent<RectTransform>();
+        mTextRect.anchorMin = Vector2.zero;
+        mTextRect.anchorMax = Vector2.one;
+        mTextRect.sizeDelta = Vector2.zero;
     }
 
     private void RemoveLegacyHUDMethodPlaceholder() {}
@@ -552,6 +614,12 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenuScene");
     }
 
     private void TriggerFloorClear()
