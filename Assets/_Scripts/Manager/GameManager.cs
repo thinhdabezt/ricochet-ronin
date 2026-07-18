@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Assets._Scripts.Manager;
+using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
@@ -72,8 +73,9 @@ public class GameManager : MonoBehaviour
         InitializeCards(); // Populates allUpgradeCards programmatically
 
         // Find UI components
-        var uiGo = GameObject.Find("UI");
+        var uiGo = GameObject.Find("UI") ?? GameObject.Find("Canvas");
         if (uiGo != null) uiCanvas = uiGo.GetComponent<Canvas>();
+        if (uiCanvas == null) uiCanvas = FindObjectOfType<Canvas>();
 
         enemiesContainer = GameObject.Find("Enemies")?.transform;
         if (enemiesContainer == null)
@@ -440,14 +442,14 @@ public class GameManager : MonoBehaviour
     {
         IsGameOver = true;
         Time.timeScale = 0.5f;
-        CreateEndGameScreen("GAME OVER", new Color(0.9f, 0.2f, 0.2f), "R to Retry");
+        CreateEndGameScreen("TIME LOOP FAILED", new Color(1f, 0.15f, 0.25f), "PRESS R OR CLICK TO RETRY");
     }
 
     private void TriggerVictory()
     {
         IsVictory = true;
         Time.timeScale = 0.5f;
-        CreateEndGameScreen("VICTORY", new Color(0.2f, 0.9f, 0.5f), "R to Play Again");
+        CreateEndGameScreen("VICTORY", new Color(0.2f, 0.9f, 0.5f), "PRESS R OR CLICK TO ADVENTURE AGAIN");
     }
 
     private void CreateEndGameScreen(string title, Color titleColor, string subtitleText)
@@ -464,37 +466,73 @@ public class GameManager : MonoBehaviour
         rect.sizeDelta = Vector2.zero;
 
         var img = endGamePanel.AddComponent<Image>();
-        img.color = new Color(0.05f, 0.05f, 0.08f, 0.85f); // Premium semi-translucent dark background
+        img.color = new Color(0.02f, 0.02f, 0.05f, 0.92f); // Cinematic dark blue-black overlay
 
-        // Central Box
-        var boxGo = new GameObject("ContentBox");
-        boxGo.transform.SetParent(endGamePanel.transform, false);
-        var boxRect = boxGo.AddComponent<RectTransform>();
-        boxRect.sizeDelta = new Vector2(400, 250);
-        var boxImg = boxGo.AddComponent<Image>();
-        boxImg.color = new Color(0.12f, 0.12f, 0.16f, 0.95f); // Slate dark panel
+        // Add Button component so clicking anywhere on the screen restarts the game
+        var btn = endGamePanel.AddComponent<Button>();
+        btn.onClick.AddListener(RestartGame);
 
-        // Title
+        var cg = endGamePanel.AddComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        cg.DOFade(1f, 0.4f).SetUpdate(true);
+
+        // Load the QuinqueFive pixel font from the HUD
+        TMP_FontAsset pixelFont = null;
+        var scoreGo = GameObject.Find("UI/Score") ?? GameObject.Find("Score");
+        if (scoreGo != null)
+        {
+            var tmp = scoreGo.GetComponent<TextMeshProUGUI>();
+            if (tmp != null) pixelFont = tmp.font;
+        }
+
+        // Title text (e.g. DISHONORED or VICTORY)
         var titleGo = new GameObject("Title");
-        titleGo.transform.SetParent(boxGo.transform, false);
+        titleGo.transform.SetParent(endGamePanel.transform, false);
         var titleText = titleGo.AddComponent<TextMeshProUGUI>();
         titleText.text = title;
-        titleText.fontSize = 42;
+        titleText.fontSize = 46;
         titleText.color = titleColor;
         titleText.alignment = TextAlignmentOptions.Center;
-        var titleRect = titleGo.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, 50);
+        if (pixelFont != null) titleText.font = pixelFont;
 
-        // Subtitle
+        var titleRect = titleGo.GetComponent<RectTransform>();
+        titleRect.sizeDelta = new Vector2(1200, 150);
+        titleRect.anchoredPosition = new Vector2(0, 40);
+
+        // Slam down animation for the title
+        titleGo.transform.localScale = new Vector3(3f, 3f, 3f);
+        titleText.alpha = 0f;
+        titleText.DOFade(1f, 0.25f).SetUpdate(true);
+        titleGo.transform.DOScale(1f, 0.55f)
+            .SetEase(Ease.OutBounce)
+            .SetUpdate(true);
+
+        // Subtitle text (e.g. PRESS R TO RETRY / CLICK TO RESTART)
         var subGo = new GameObject("Subtitle");
-        subGo.transform.SetParent(boxGo.transform, false);
+        subGo.transform.SetParent(endGamePanel.transform, false);
         var subText = subGo.AddComponent<TextMeshProUGUI>();
         subText.text = subtitleText;
-        subText.fontSize = 20;
-        subText.color = Color.white;
+        subText.fontSize = 14;
+        subText.color = new Color(0.7f, 0.7f, 0.8f);
         subText.alignment = TextAlignmentOptions.Center;
+        if (pixelFont != null) subText.font = pixelFont;
+
         var subRect = subGo.GetComponent<RectTransform>();
-        subRect.anchoredPosition = new Vector2(0, -50);
+        subRect.sizeDelta = new Vector2(1200, 100);
+        subRect.anchoredPosition = new Vector2(0, -60);
+
+        // Subtle pulsing animation for subtitle after delay
+        subText.alpha = 0f;
+        DOTween.Sequence()
+            .AppendInterval(0.4f)
+            .Append(subText.DOFade(1f, 0.3f))
+            .AppendCallback(() => {
+                subGo.transform.DOScale(1.08f, 0.8f)
+                    .SetLoops(-1, LoopType.Yoyo)
+                    .SetEase(Ease.InOutSine)
+                    .SetUpdate(true);
+            })
+            .SetUpdate(true);
     }
 
     private void RemoveLegacyHUDMethodPlaceholder() {}

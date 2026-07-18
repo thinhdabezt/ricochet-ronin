@@ -1477,7 +1477,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -2391,7 +2391,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -2635,7 +2635,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -3424,7 +3424,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -3546,7 +3546,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -4275,7 +4275,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -5151,7 +5151,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.95, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.95, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 2.375, b: 2.5, a: 2.5}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -5763,7 +5763,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -6371,7 +6371,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.95, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.95, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 1.9, b: 2, a: 2}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -6776,7 +6776,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -7024,7 +7024,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -7393,15 +7393,6 @@ MonoBehaviour:
   m_Script: {fileID: 1297620105}
   m_Name: 
   m_EditorClassIdentifier: DynamicScript_fd63d9fc4b86489088fc0a27750e2c16::NeonSceneGenerator
-  wallThickness: 1
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  customPhysicsMaterial: {fileID: 0}
-  gridSpacing: 2
-  gridOpacity: 0.08
-  gridColor: {r: 0, g: 0.5, b: 1, a: 1}
-  targetCamera: {fileID: 519420031}
 --- !u!4 &971520493
 Transform:
   m_ObjectHideFlags: 0
@@ -8161,7 +8152,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -8283,7 +8274,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -9314,7 +9305,7 @@ Sprite:
         format: 0
         dimension: 0
       m_DataSize: 80
-      _typelessdata: 0ad7a3bb0ad7a33b000000000ad7a33b0ad7a33b000000000ad7a3bb0ad7a3bb000000000ad7a33b0ad7a3bb000000000000000000000000000000000000000000000000000000000000000000000000
+      _typelessdata: 0ad7a3bb0ad7a33b000000000ad7a33b0ad7a33b000000000ad7a3bb0ad7a3bb000000000ad7a33b0ad7a3bb00000000000000000000803f0000803f0000803f00000000000000000000803f00000000
     m_Bindpose: []
     textureRect:
       serializedVersion: 2
@@ -9448,7 +9439,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -9956,7 +9947,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -10084,15 +10075,18 @@ MonoBehaviour:
   scoreText: {fileID: 0}
   comboText: {fileID: 0}
   objectiveText: {fileID: 1002885620}
+  floorText: {fileID: 0}
   timeContainer: {fileID: 0}
   scoreContainer: {fileID: 0}
   comboContainer: {fileID: 0}
   objectiveContainer: {fileID: 0}
+  floorContainer: {fileID: 0}
   timePrefix: 'TIME: '
   scorePrefix: 'SCORE: '
   comboPrefix: 'COMBO: '
   objectivePrefix: 'Survive: '
   objectiveSuffix: ' seconds remaining'
+  floorPrefix: 'FLOOR: '
 --- !u!21 &1294082963
 Material:
   serializedVersion: 8
@@ -10438,7 +10432,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -10902,7 +10896,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.95, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.95, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 2.375, b: 2.5, a: 2.5}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -11115,7 +11109,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.95, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.95, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 2.375, b: 2.5, a: 2.5}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -11556,7 +11550,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -11678,7 +11672,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -11800,7 +11794,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.95, b: 1, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.95, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 2.375, b: 2.5, a: 2.5}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -12212,7 +12206,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -12440,7 +12434,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -13276,7 +13270,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -13398,7 +13392,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -14049,7 +14043,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -15157,7 +15151,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -15279,7 +15273,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
@@ -15401,7 +15395,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 0.5, b: 1, a: 0.08}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0.5, b: 1, a: 0.08}
     - _EmissionColor: {r: 0, g: 0.6, b: 1.2, a: 0.096}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
