@@ -573,6 +573,15 @@ public class GameManager : MonoBehaviour
             ScriptableObject.CreateInstance<GlassBladeCard>(),
             ScriptableObject.CreateInstance<SatanicHourglassCard>()
         };
+
+        // Link with IndexEntryData dynamically at runtime
+        foreach (var card in allUpgradeCards)
+        {
+            if (IndexManager.Instance != null)
+            {
+                card.indexData = IndexManager.Instance.AllEntries.Find(e => e.EntryName == card.cardName);
+            }
+        }
     }
 
     private List<UpgradeCardSO> GetRandomCards(int count)
@@ -718,6 +727,10 @@ public class GameManager : MonoBehaviour
                 if (player != null)
                 {
                     card.ApplyUpgrade(player);
+                    if (card.indexData != null && IndexManager.Instance != null)
+                    {
+                        IndexManager.Instance.UnlockEntry(card.indexData.EntryID);
+                    }
                 }
 
                 if (card.cardType == CardType.Mutation)

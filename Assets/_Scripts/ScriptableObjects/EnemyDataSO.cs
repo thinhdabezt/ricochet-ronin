@@ -37,4 +37,7 @@ public class EnemyDataSO : ScriptableObject
     [Header("Special Mechanics")]
     public EnemySpecialMechanic specialMechanic;
     public GameObject customEffectPrefab; // Prefab hỗ trợ (SlowZone, Explosion, hoặc Split)
+
+    [Header("Index System")]
+    public IndexEntryData indexData;
 }

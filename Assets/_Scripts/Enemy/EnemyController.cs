@@ -576,6 +576,10 @@ public class EnemyController : MonoBehaviour
         // Notify GameManager and destroy
         GameEvents.OnScoreAndTimeGained?.Invoke((Vector2)transform.position, enemyData.scoreValue, totalTimeBonus);
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
+        if (enemyData != null && enemyData.indexData != null && IndexManager.Instance != null)
+        {
+            IndexManager.Instance.UnlockEntry(enemyData.indexData.EntryID);
+        }
         Destroy(gameObject);
     }
 
@@ -616,6 +620,10 @@ public class EnemyController : MonoBehaviour
             SplitSlimes();
         }
 
+        if (enemyData != null && enemyData.indexData != null && IndexManager.Instance != null)
+        {
+            IndexManager.Instance.UnlockEntry(enemyData.indexData.EntryID);
+        }
         Destroy(gameObject);
     }
 
