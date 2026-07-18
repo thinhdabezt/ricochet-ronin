@@ -6,7 +6,8 @@ using TMPro;
 public class IndexUIController : MonoBehaviour
 {
     [Header("Grid Setup")]
-    [SerializeField] private Transform gridContainer;
+    [SerializeField] private Transform encountersGridContainer;
+    [SerializeField] private Transform perksGridContainer;
     [SerializeField] private GameObject gridItemTemplate;
 
     [Header("Details Panel References")]
@@ -52,24 +53,22 @@ public class IndexUIController : MonoBehaviour
 
     private void PopulateGrid()
     {
-        if (gridContainer == null || gridItemTemplate == null || IndexManager.Instance == null) return;
+        if (encountersGridContainer == null || perksGridContainer == null || gridItemTemplate == null || IndexManager.Instance == null) return;
 
         gridItemTemplate.SetActive(false);
 
-        foreach (Transform child in gridContainer)
-        {
-            if (child.gameObject != gridItemTemplate)
-            {
-                Destroy(child.gameObject);
-            }
-        }
+        // Clear both containers
+        ClearContainer(encountersGridContainer);
+        ClearContainer(perksGridContainer);
 
         var entries = IndexManager.Instance.AllEntries;
         foreach (var entry in entries)
         {
             if (entry == null) continue;
 
-            GameObject itemGo = Instantiate(gridItemTemplate, gridContainer);
+            Transform targetContainer = entry.Type == IndexType.Monster ? encountersGridContainer : perksGridContainer;
+
+            GameObject itemGo = Instantiate(gridItemTemplate, targetContainer);
             itemGo.SetActive(true);
 
             Button btn = itemGo.GetComponent<Button>();
@@ -100,6 +99,17 @@ public class IndexUIController : MonoBehaviour
             if (btn != null)
             {
                 btn.onClick.AddListener(() => ShowDetails(entry, isUnlocked));
+            }
+        }
+    }
+
+    private void ClearContainer(Transform container)
+    {
+        foreach (Transform child in container)
+        {
+            if (child.gameObject != gridItemTemplate)
+            {
+                Destroy(child.gameObject);
             }
         }
     }

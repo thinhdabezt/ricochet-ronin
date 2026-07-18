@@ -198,20 +198,66 @@ public class SetupIndexSystem : EditorWindow
         contentRect.pivot = new Vector2(0.5f, 1f);
         contentRect.sizeDelta = new Vector2(0f, 300f);
         
-        GridLayoutGroup gridLayout = contentGo.AddComponent<GridLayoutGroup>();
-        gridLayout.cellSize = new Vector2(100, 100);
-        gridLayout.spacing = new Vector2(15, 15);
-        gridLayout.padding = new RectOffset(10, 10, 10, 10);
-        gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        gridLayout.constraintCount = 4;
+        VerticalLayoutGroup vlg = contentGo.AddComponent<VerticalLayoutGroup>();
+        vlg.childForceExpandWidth = true;
+        vlg.childForceExpandHeight = false;
+        vlg.childControlWidth = true;
+        vlg.childControlHeight = true;
+        vlg.spacing = 20f;
+        vlg.padding = new RectOffset(10, 10, 10, 10);
         
         ContentSizeFitter fitter = contentGo.AddComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         scrollRect.content = contentRect;
 
+        // Encounters Header
+        GameObject encountersHeaderGo = new GameObject("EncountersHeader");
+        encountersHeaderGo.transform.SetParent(contentGo.transform, false);
+        TextMeshProUGUI encountersHeaderTxt = encountersHeaderGo.AddComponent<TextMeshProUGUI>();
+        encountersHeaderTxt.text = "— ENCOUNTERS —";
+        encountersHeaderTxt.fontSize = 11;
+        encountersHeaderTxt.color = new Color(1f, 0.3f, 0.3f); // Neon Red
+        encountersHeaderTxt.alignment = TextAlignmentOptions.Left;
+        if (pixelFont != null) encountersHeaderTxt.font = pixelFont;
+
+        // Encounters Grid
+        GameObject encountersGridGo = new GameObject("EncountersGrid");
+        encountersGridGo.transform.SetParent(contentGo.transform, false);
+        GridLayoutGroup encountersGrid = encountersGridGo.AddComponent<GridLayoutGroup>();
+        encountersGrid.cellSize = new Vector2(90, 90);
+        encountersGrid.spacing = new Vector2(15, 15);
+        encountersGrid.padding = new RectOffset(5, 5, 5, 5);
+        encountersGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        encountersGrid.constraintCount = 4;
+        ContentSizeFitter encountersFitter = encountersGridGo.AddComponent<ContentSizeFitter>();
+        encountersFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        // Perks Header
+        GameObject perksHeaderGo = new GameObject("PerksHeader");
+        perksHeaderGo.transform.SetParent(contentGo.transform, false);
+        TextMeshProUGUI perksHeaderTxt = perksHeaderGo.AddComponent<TextMeshProUGUI>();
+        perksHeaderTxt.text = "— PERKS & MUTATIONS —";
+        perksHeaderTxt.fontSize = 11;
+        perksHeaderTxt.color = new Color(0.3f, 0.8f, 1f); // Neon Cyan
+        perksHeaderTxt.alignment = TextAlignmentOptions.Left;
+        if (pixelFont != null) perksHeaderTxt.font = pixelFont;
+
+        // Perks Grid
+        GameObject perksGridGo = new GameObject("PerksGrid");
+        perksGridGo.transform.SetParent(contentGo.transform, false);
+        GridLayoutGroup perksGrid = perksGridGo.AddComponent<GridLayoutGroup>();
+        perksGrid.cellSize = new Vector2(90, 90);
+        perksGrid.spacing = new Vector2(15, 15);
+        perksGrid.padding = new RectOffset(5, 5, 5, 5);
+        perksGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        perksGrid.constraintCount = 4;
+        ContentSizeFitter perksFitter = perksGridGo.AddComponent<ContentSizeFitter>();
+        perksFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
         // Template Item
         GameObject itemTemplate = new GameObject("GridItemTemplate");
-        itemTemplate.transform.SetParent(contentGo.transform, false);
+        itemTemplate.transform.SetParent(viewportGo.transform, false);
+        itemTemplate.SetActive(false);
         RectTransform itemRect = itemTemplate.AddComponent<RectTransform>();
         itemRect.sizeDelta = new Vector2(100, 100);
         
@@ -366,7 +412,8 @@ public class SetupIndexSystem : EditorWindow
         IndexUIController uiController = canvasGo.AddComponent<IndexUIController>();
         
         // Link serializations on uiController
-        var gridContainerField = typeof(IndexUIController).GetField("gridContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var encountersGridContainerField = typeof(IndexUIController).GetField("encountersGridContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var perksGridContainerField = typeof(IndexUIController).GetField("perksGridContainer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var gridItemTemplateField = typeof(IndexUIController).GetField("gridItemTemplate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var detailsIconField = typeof(IndexUIController).GetField("detailsIcon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var detailsNameField = typeof(IndexUIController).GetField("detailsName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -376,7 +423,8 @@ public class SetupIndexSystem : EditorWindow
         var backButtonField = typeof(IndexUIController).GetField("backButton", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var lockSpriteField = typeof(IndexUIController).GetField("lockSprite", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
-        gridContainerField.SetValue(uiController, contentGo.transform);
+        encountersGridContainerField.SetValue(uiController, encountersGridGo.transform);
+        perksGridContainerField.SetValue(uiController, perksGridGo.transform);
         gridItemTemplateField.SetValue(uiController, itemTemplate);
         detailsIconField.SetValue(uiController, detIcon);
         detailsNameField.SetValue(uiController, detName);
