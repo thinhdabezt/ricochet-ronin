@@ -22,3 +22,4 @@ MonoBehaviour:
   actionCooldown: 3
   specialMechanic: 2
   customEffectPrefab: {fileID: 0}
+  indexData: {fileID: 11400000, guid: ad3b2fa54f3df4e46a4dde4f1d98aef0, type: 2}
