@@ -9,8 +9,6 @@ using UnityEditor;
 
 public class NeonSceneGenerator : MonoBehaviour
 {
-    [Header("Boundary Configuration")]
-    [SerializeField] private float wallThickness = 1.0f;
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private PhysicsMaterial2D customPhysicsMaterial;
 
@@ -258,7 +256,7 @@ public class NeonSceneGenerator : MonoBehaviour
 
     private void SetupPostProcessingVolume()
     {
-        Volume volume = FindObjectOfType<Volume>();
+        Volume volume = FindFirstObjectByType<Volume>();
         if (volume == null)
         {
             GameObject volumeGo = new GameObject("Global Volume");
@@ -427,7 +425,7 @@ public class NeonSceneGeneratorEditor : EditorWindow
     public static void GenerateArenaMenu()
     {
         // Find NeonSceneGenerator in scene or create one
-        NeonSceneGenerator generator = FindObjectOfType<NeonSceneGenerator>();
+        NeonSceneGenerator generator = FindFirstObjectByType<NeonSceneGenerator>();
         if (generator == null)
         {
             GameObject go = new GameObject("NeonSceneGenerator");

@@ -217,7 +217,7 @@ public class EnemyController : MonoBehaviour
         int count = 0;
 
         // Avoid other enemies
-        var allEnemies = FindObjectsOfType<EnemyController>();
+        var allEnemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         foreach (var other in allEnemies)
         {
             if (other != this && other != null && !other.isFusing)

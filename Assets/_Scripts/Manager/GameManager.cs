@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
         // Find UI components
         var uiGo = GameObject.Find("UI") ?? GameObject.Find("Canvas");
         if (uiGo != null) uiCanvas = uiGo.GetComponent<Canvas>();
-        if (uiCanvas == null) uiCanvas = FindObjectOfType<Canvas>();
+        if (uiCanvas == null) uiCanvas = FindFirstObjectByType<Canvas>();
 
         enemiesContainer = GameObject.Find("Enemies")?.transform;
         if (enemiesContainer == null)
@@ -319,7 +319,7 @@ public class GameManager : MonoBehaviour
 
     public void FreezeAllEnemies(float duration)
     {
-        var activeEnemies = FindObjectsOfType<EnemyController>();
+        var activeEnemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
         foreach (var enemy in activeEnemies)
         {
             if (enemy != null)
@@ -627,7 +627,7 @@ public class GameManager : MonoBehaviour
         isFloorCleared = true;
 
         // Clean up remaining entities in the level (like slow zones)
-        var slowZones = FindObjectsOfType<SlowZone>();
+        var slowZones = FindObjectsByType<SlowZone>(FindObjectsSortMode.None);
         foreach (var sz in slowZones)
         {
             Destroy(sz.gameObject);
@@ -916,7 +916,7 @@ public class GameManager : MonoBehaviour
         }
 
         // Clean up remaining slow zones or hazards
-        var slowZones = FindObjectsOfType<SlowZone>();
+        var slowZones = FindObjectsByType<SlowZone>(FindObjectsSortMode.None);
         foreach (var sz in slowZones)
         {
             Destroy(sz.gameObject);

@@ -220,7 +220,7 @@ public class OrthographicArenaConfiner : MonoBehaviour
     private void SpawnHitSparks(Vector2 position, Vector2 normal)
     {
         // Clean up any existing particle systems to prevent "Setting the duration while system is still playing" error
-        ParticleSystem[] existingSparks = GameObject.FindObjectsOfType<ParticleSystem>();
+        ParticleSystem[] existingSparks = UnityEngine.Object.FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None);
         foreach (ParticleSystem existingPs in existingSparks)
         {
             if (existingPs.gameObject.name == "WallHitSparks")
