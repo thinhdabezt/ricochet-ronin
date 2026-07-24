@@ -399,12 +399,29 @@ public class EnemyController : MonoBehaviour
                         }
                     }
 
-                    int damage = (GameManager.Instance != null && GameManager.Instance.IsGlassBladeActive ? 3 : 1);
+                    float baseDamage = (GameManager.Instance != null && GameManager.Instance.IsGlassBladeActive ? 3f : 1f);
                     if (GameManager.Instance != null)
                     {
-                        damage += player.CurrentDashBounces * GameManager.Instance.KineticMomentumBonusDamage;
+                        baseDamage += player.CurrentDashBounces * GameManager.Instance.KineticMomentumBonusDamage;
                     }
 
+                    // Apply +5% damage bonus if monster has been killed >= 50 times
+                    if (enemyData != null && enemyData.indexData != null && IndexManager.Instance != null)
+                    {
+                        if (IndexManager.Instance.GetKillCount(enemyData.indexData.EntryID) >= 50)
+                        {
+                            float bonus = baseDamage * 0.05f;
+                            int extraDamage = Mathf.FloorToInt(bonus);
+                            float extraChance = bonus - extraDamage;
+                            if (Random.value < extraChance)
+                            {
+                                extraDamage++;
+                            }
+                            baseDamage += extraDamage;
+                        }
+                    }
+
+                    int damage = Mathf.RoundToInt(baseDamage);
                     bool willKill = damage >= currentHealth;
 
                     TakeDamage(damage);
@@ -578,7 +595,7 @@ public class EnemyController : MonoBehaviour
         GameEvents.OnEnemyDie?.Invoke(enemyData.scoreValue, (Vector2)transform.position);
         if (enemyData != null && enemyData.indexData != null && IndexManager.Instance != null)
         {
-            IndexManager.Instance.UnlockEntry(enemyData.indexData.EntryID);
+            IndexManager.Instance.RecordKill(enemyData.indexData.EntryID);
         }
         Destroy(gameObject);
     }
@@ -622,7 +639,7 @@ public class EnemyController : MonoBehaviour
 
         if (enemyData != null && enemyData.indexData != null && IndexManager.Instance != null)
         {
-            IndexManager.Instance.UnlockEntry(enemyData.indexData.EntryID);
+            IndexManager.Instance.RecordKill(enemyData.indexData.EntryID);
         }
         Destroy(gameObject);
     }

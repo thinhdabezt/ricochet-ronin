@@ -9,6 +9,7 @@ public class IndexManager : MonoBehaviour
     [SerializeField] private List<IndexEntryData> allEntries = new List<IndexEntryData>();
 
     private HashSet<string> unlockedIDs = new HashSet<string>();
+    private Dictionary<string, int> monsterKillCounts = new Dictionary<string, int>();
     private const string SAVE_KEY = "RicochetRonin_Index_Save";
 
     public List<IndexEntryData> AllEntries => allEntries;
@@ -41,6 +42,42 @@ public class IndexManager : MonoBehaviour
         }
     }
 
+    public void RecordKill(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return;
+
+        // Auto-unlock the entry on the first kill
+        if (!unlockedIDs.Contains(id))
+        {
+            unlockedIDs.Add(id);
+            Debug.Log($"🎉 Unlocked Index Entry via Kill: {id}");
+            TriggerUnlockPopup(id);
+        }
+
+        // Increment kill count
+        if (monsterKillCounts.ContainsKey(id))
+        {
+            monsterKillCounts[id]++;
+        }
+        else
+        {
+            monsterKillCounts[id] = 1;
+        }
+
+        Debug.Log($"💀 Recorded kill for {id}. Total kills: {monsterKillCounts[id]}");
+        SaveIndexData();
+    }
+
+    public int GetKillCount(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return 0;
+        if (monsterKillCounts.TryGetValue(id, out int count))
+        {
+            return count;
+        }
+        return 0;
+    }
+
     public bool IsUnlocked(string id) => unlockedIDs.Contains(id);
 
     private void TriggerUnlockPopup(string id)
@@ -54,7 +91,17 @@ public class IndexManager : MonoBehaviour
 
     public void SaveIndexData()
     {
-        IndexSaveData data = new IndexSaveData { unlockedIDs = new List<string>(unlockedIDs) };
+        List<KillEntry> killList = new List<KillEntry>();
+        foreach (var kvp in monsterKillCounts)
+        {
+            killList.Add(new KillEntry { entryID = kvp.Key, killCount = kvp.Value });
+        }
+
+        IndexSaveData data = new IndexSaveData 
+        { 
+            unlockedIDs = new List<string>(unlockedIDs),
+            killCounts = killList
+        };
         string json = JsonUtility.ToJson(data);
         PlayerPrefs.SetString(SAVE_KEY, json);
         PlayerPrefs.Save();
@@ -63,21 +110,43 @@ public class IndexManager : MonoBehaviour
     public void LoadIndexData()
     {
         unlockedIDs.Clear();
+        monsterKillCounts.Clear();
         if (PlayerPrefs.HasKey(SAVE_KEY))
         {
             string json = PlayerPrefs.GetString(SAVE_KEY);
             IndexSaveData data = JsonUtility.FromJson<IndexSaveData>(json);
-            if (data != null && data.unlockedIDs != null)
+            if (data != null)
             {
-                unlockedIDs = new HashSet<string>(data.unlockedIDs);
+                if (data.unlockedIDs != null)
+                {
+                    unlockedIDs = new HashSet<string>(data.unlockedIDs);
+                }
+                if (data.killCounts != null)
+                {
+                    foreach (var entry in data.killCounts)
+                    {
+                        if (!string.IsNullOrEmpty(entry.entryID))
+                        {
+                            monsterKillCounts[entry.entryID] = entry.killCount;
+                        }
+                    }
+                }
             }
         }
+    }
+
+    [System.Serializable]
+    private class KillEntry
+    {
+        public string entryID;
+        public int killCount;
     }
 
     [System.Serializable]
     private class IndexSaveData
     {
         public List<string> unlockedIDs;
+        public List<KillEntry> killCounts;
     }
 
     public void SetAllEntries(List<IndexEntryData> entries)

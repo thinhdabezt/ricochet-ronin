@@ -105,23 +105,52 @@ public class IndexUIController : MonoBehaviour
             TextMeshProUGUI label = itemGo.transform.Find("Text")?.GetComponent<TextMeshProUGUI>();
 
             bool isUnlocked = IndexManager.Instance.IsUnlocked(entry.EntryID);
+            int killCount = entry.Type == IndexType.Monster ? IndexManager.Instance.GetKillCount(entry.EntryID) : 0;
 
             if (label != null)
             {
-                label.text = isUnlocked ? entry.EntryName : "???";
+                if (entry.Type == IndexType.Monster)
+                {
+                    label.text = killCount >= 1 ? entry.EntryName : "???";
+                }
+                else
+                {
+                    label.text = isUnlocked ? entry.EntryName : "???";
+                }
             }
 
             if (img != null)
             {
-                if (isUnlocked)
+                if (entry.Type == IndexType.Monster)
                 {
-                    img.sprite = entry.Icon;
-                    img.color = unlockedColor;
+                    if (killCount >= 10)
+                    {
+                        img.sprite = entry.Icon;
+                        img.color = unlockedColor;
+                    }
+                    else if (killCount >= 1)
+                    {
+                        img.sprite = entry.Icon;
+                        img.color = Color.black; // Silhouette
+                    }
+                    else
+                    {
+                        img.sprite = lockSprite;
+                        img.color = lockedColor;
+                    }
                 }
                 else
                 {
-                    img.sprite = lockSprite;
-                    img.color = lockedColor;
+                    if (isUnlocked)
+                    {
+                        img.sprite = entry.Icon;
+                        img.color = unlockedColor;
+                    }
+                    else
+                    {
+                        img.sprite = lockSprite;
+                        img.color = lockedColor;
+                    }
                 }
             }
 
@@ -147,24 +176,54 @@ public class IndexUIController : MonoBehaviour
     {
         if (entry == null) return;
 
+        int killCount = entry.Type == IndexType.Monster ? IndexManager.Instance.GetKillCount(entry.EntryID) : 0;
+
         if (detailsIcon != null)
         {
             detailsIcon.gameObject.SetActive(true);
-            if (isUnlocked)
+            if (entry.Type == IndexType.Monster)
             {
-                detailsIcon.sprite = entry.Icon;
-                detailsIcon.color = unlockedColor;
+                if (killCount >= 10)
+                {
+                    detailsIcon.sprite = entry.Icon;
+                    detailsIcon.color = unlockedColor;
+                }
+                else if (killCount >= 1)
+                {
+                    detailsIcon.sprite = entry.Icon;
+                    detailsIcon.color = Color.black; // Silhouette
+                }
+                else
+                {
+                    detailsIcon.sprite = lockSprite;
+                    detailsIcon.color = lockedColor;
+                }
             }
             else
             {
-                detailsIcon.sprite = lockSprite;
-                detailsIcon.color = lockedColor;
+                if (isUnlocked)
+                {
+                    detailsIcon.sprite = entry.Icon;
+                    detailsIcon.color = unlockedColor;
+                }
+                else
+                {
+                    detailsIcon.sprite = lockSprite;
+                    detailsIcon.color = lockedColor;
+                }
             }
         }
 
         if (detailsName != null)
         {
-            detailsName.text = isUnlocked ? entry.EntryName : "LOCKED ENTRY";
+            if (entry.Type == IndexType.Monster)
+            {
+                detailsName.text = killCount >= 1 ? entry.EntryName : "LOCKED ENTRY";
+            }
+            else
+            {
+                detailsName.text = isUnlocked ? entry.EntryName : "LOCKED ENTRY";
+            }
         }
 
         if (detailsType != null)
@@ -175,14 +234,43 @@ public class IndexUIController : MonoBehaviour
 
         if (detailsDescription != null)
         {
-            detailsDescription.text = isUnlocked 
-                ? entry.Description 
-                : "Defeat this enemy or select this upgrade in combat to unlock its entry details.";
+            if (entry.Type == IndexType.Monster)
+            {
+                if (killCount >= 50)
+                {
+                    detailsDescription.text = $"{entry.Description}\n\nKills: {killCount} (Maxed)\n🔥 <color=#32cd32>Bonus: +5% Damage against this enemy type!</color>";
+                }
+                else if (killCount >= 10)
+                {
+                    detailsDescription.text = $"{entry.Description}\n\nKills: {killCount} / 50\n(Defeat 50 to unlock Lore & +5% Damage bonus)";
+                }
+                else if (killCount >= 1)
+                {
+                    detailsDescription.text = $"Kills: {killCount} / 50\n\n[Stats Locked]\nDefeat 10 of this enemy type to unlock statistics.\nDefeat 50 to unlock Lore & +5% Damage bonus.";
+                }
+                else
+                {
+                    detailsDescription.text = "Defeat this enemy in combat to unlock its entry details.";
+                }
+            }
+            else
+            {
+                detailsDescription.text = isUnlocked 
+                    ? entry.Description 
+                    : "Select this upgrade in combat to unlock its entry details.";
+            }
         }
 
         if (detailsLore != null)
         {
-            detailsLore.text = isUnlocked ? $"\"{entry.LoreText}\"" : "???";
+            if (entry.Type == IndexType.Monster)
+            {
+                detailsLore.text = killCount >= 50 ? $"\"{entry.LoreText}\"" : "???";
+            }
+            else
+            {
+                detailsLore.text = isUnlocked ? $"\"{entry.LoreText}\"" : "???";
+            }
         }
     }
 }
