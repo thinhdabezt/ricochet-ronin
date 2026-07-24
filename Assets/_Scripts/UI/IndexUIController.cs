@@ -99,6 +99,7 @@ public class IndexUIController : MonoBehaviour
 
             GameObject itemGo = Instantiate(gridItemTemplate, targetContainer);
             itemGo.SetActive(true);
+            itemGo.AddComponent<UIHoverScale>();
 
             Button btn = itemGo.GetComponent<Button>();
             Image img = itemGo.transform.Find("Icon")?.GetComponent<Image>();
