@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using DG.Tweening;
 
 public class IndexUIController : MonoBehaviour
 {
@@ -27,6 +28,18 @@ public class IndexUIController : MonoBehaviour
 
     private void Start()
     {
+        // Smooth entry transition (fade-in & zoom-in)
+        CanvasGroup cg = GetComponent<CanvasGroup>();
+        if (cg == null)
+        {
+            cg = gameObject.AddComponent<CanvasGroup>();
+        }
+        cg.alpha = 0f;
+        cg.DOFade(1f, 0.6f).SetEase(Ease.OutCubic).SetUpdate(true);
+
+        transform.localScale = new Vector3(0.95f, 0.95f, 1f);
+        transform.DOScale(1f, 0.6f).SetEase(Ease.OutCubic).SetUpdate(true);
+
         if (backButton != null)
         {
             backButton.onClick.AddListener(BackToMainMenu);
@@ -39,7 +52,23 @@ public class IndexUIController : MonoBehaviour
     private void BackToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenuScene");
+
+        // Smooth exit transition (fade-out & zoom-out)
+        CanvasGroup cg = GetComponent<CanvasGroup>();
+        if (cg != null)
+        {
+            if (backButton != null) backButton.interactable = false;
+            
+            transform.DOScale(0.95f, 0.4f).SetEase(Ease.InCubic).SetUpdate(true);
+            cg.DOFade(0f, 0.4f).SetEase(Ease.InCubic).SetUpdate(true).OnComplete(() =>
+            {
+                SceneManager.LoadScene("MainMenuScene");
+            });
+        }
+        else
+        {
+            SceneManager.LoadScene("MainMenuScene");
+        }
     }
 
     private void ClearDetails()
